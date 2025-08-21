@@ -1,9 +1,312 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+## 🚀 Tests Postman pour FormationController
+#
+### ⚙️ Configuration de base
+#
+#**Base URL :** `http://localhost:8080/api/formations`
+#
+#**Variables d'environnement Postman :**
+#- `baseUrl` : `http://localhost:8080/api`
+#
+#---
+#
+### 📋 Collection complète des tests
+#
+#### 🔓 ENDPOINTS PUBLICS
+#
+##### 1️⃣ **GET - Lister toutes les formations actives**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations
+#```
+#
+#**Avec paramètres de pagination et filtre :**
+#```
+#GET {{baseUrl}}/formations?page=0&size=10&sortBy=nom&sortDir=asc&categorie=Beauté
+#```
+#
+#**Tests possibles :**
+#- Sans paramètres
+#- Avec pagination : `?page=1&size=5`
+#- Avec tri : `?sortBy=prix&sortDir=desc`
+#- Avec catégorie : `?categorie=Informatique`
+#
+#---
+#
+##### 2️⃣ **GET - Recherche avancée**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations/search
+#```
+#
+#**Recherche simple :**
+#```
+#GET {{baseUrl}}/formations/search?q=maquillage
+#```
+#
+#**Recherche complète avec tous les filtres :**
+#```
+#GET {{baseUrl}}/formations/search?q=formation&categorie=Beauté&prixMin=50000&prixMax=200000&promotion=true&certificat=true&placesDisponibles=true&duree=3 mois&page=0&size=10&sortBy=prix&sortDir=asc
+#```
+#
+#**Paramètres disponibles :**
+#- `q` : terme de recherche
+#- `categorie` : catégorie spécifique
+#- `prixMin` : prix minimum
+#- `prixMax` : prix maximum
+#- `promotion` : formations en promotion (true/false)
+#- `certificat` : avec certificat (true/false)
+#- `placesDisponibles` : places disponibles (true/false)
+#- `duree` : durée spécifique
+#- `page`, `size`, `sortBy`, `sortDir` : pagination et tri
+#
+#---
+#
+##### 3️⃣ **GET - Détail d'une formation par ID**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations/1
+#```
+#
+#**Avec paramètre pour incrémenter les vues :**
+#```
+#GET {{baseUrl}}/formations/1?incrementerVues=true
+#```
+#
+#**Sans incrémenter les vues :**
+#```
+#GET {{baseUrl}}/formations/1?incrementerVues=false
+#```
+#
+#---
+#
+##### 4️⃣ **GET - Détail par slug (SEO-friendly)**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations/slug/formation-maquillage-professionnel-1234
+#```
+#
+#**Avec paramètre :**
+#```
+#GET {{baseUrl}}/formations/slug/mon-slug?incrementerVues=true
+#```
+#
+#---
+#
+##### 5️⃣ **GET - Formations en promotion**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations/promotions
+#```
+#
+#**Avec pagination :**
+#```
+#GET {{baseUrl}}/formations/promotions?page=0&size=5
+#```
+#
+#---
+#
+##### 6️⃣ **POST - Enregistrer demande d'information**
+#```
+#Method: POST
+#URL: {{baseUrl}}/formations/1/demande-info
+#```
+#
+#**Aucun body requis**
+#
+#---
+#
+##### 7️⃣ **POST - Enregistrer inscription**
+#```
+#Method: POST
+#URL: {{baseUrl}}/formations/1/inscription
+#```
+#
+#**Aucun body requis**
+#
+#---
+#
+#### 🔒 ENDPOINTS ADMINISTRATION
+#
+##### 8️⃣ **POST - Créer une formation**
+#```
+#Method: POST
+#URL: {{baseUrl}}/formations
+#Headers:
+#- Content-Type: application/json
+#- X-Admin-User: admin-test
+#```
+#
+#**Body (raw JSON) :**
+#```json
+#{
+#    "nom": "Formation Maquillage Professionnel",
+#    "description": "Une formation complète pour devenir maquilleur professionnel. Vous apprendrez toutes les techniques de base et avancées du maquillage, les différents types de peau, l'utilisation des produits professionnels, et les tendances actuelles du secteur.",
+#    "duree": "3 mois",
+#    "prix": 150000,
+#    "categorie": "Beauté",
+#    "certificatDelivre": true,
+#    "nomCertificat": "Certificat Maquillage Pro IBE",
+#    "programme": "Module 1: Bases du maquillage\nModule 2: Maquillage de jour\nModule 3: Maquillage de soirée\nModule 4: Maquillage artistique",
+#    "objectifs": "Maîtriser les techniques professionnelles de maquillage et pouvoir exercer en tant que maquilleur indépendant",
+#    "materielFourni": "Kit complet de maquillage professionnel, pinceaux, produits de marques reconnues",
+#    "horaires": "Lundi à Vendredi 9h-12h",
+#    "frequence": "3 fois par semaine",
+#    "nombrePlaces": 15,
+#    "nombreInscritsAffiche": 5,
+#    "socialProofActif": true,
+#    "photoPrincipale": "https://example.com/maquillage-principale.jpg",
+#    "photosGalerie": [
+#        "https://example.com/photo1.jpg",
+#        "https://example.com/photo2.jpg"
+#    ],
+#    "videoPresentation": "https://youtube.com/watch?v=example",
+#    "enPromotion": true,
+#    "pourcentageReduction": 20.0,
+#    "dateDebutPromo": "2025-01-01T00:00:00",
+#    "dateFinPromo": "2025-03-31T23:59:59",
+#    "metaTitle": "Formation Maquillage Professionnel IBE - Devenez Expert",
+#    "metaDescription": "Formation complète de maquillage professionnel avec certification. 3 mois d'apprentissage intensif avec les meilleurs formateurs.",
+#    "active": true
+#}
+#```
+#
+#---
+#
+##### 9️⃣ **PUT - Modifier une formation**
+#```
+#Method: PUT
+#URL: {{baseUrl}}/formations/1
+#Headers:
+#- Content-Type: application/json
+#- X-Admin-User: admin-modificateur
+#```
+#
+#**Body (raw JSON) :**
+#```json
+#{
+#    "nom": "Formation Maquillage Professionnel - MISE À JOUR",
+#    "description": "Formation mise à jour avec de nouveaux modules et techniques avancées.",
+#    "prix": 140000,
+#    "pourcentageReduction": 25.0,
+#    "nombreInscritsAffiche": 8,
+#    "socialProofActif": true,
+#    "duree": "4 mois",
+#    "categorie": "Beauté Premium"
+#}
+#```
+#
+#---
+#
+##### 🔟 **DELETE - Supprimer (désactiver) une formation**
+#```
+#Method: DELETE
+#URL: {{baseUrl}}/formations/1
+#```
+#
+#**Aucun body ou header spécial requis**
+#
+#---
+#
+##### 1️⃣1️⃣ **GET - Liste complète pour administration**
+#```
+#Method: GET
+#URL: {{baseUrl}}/formations/admin
+#```
+#
+#**Avec paramètres :**
+#```
+#GET {{baseUrl}}/formations/admin?page=0&size=20&sortBy=dateCreation&sortDir=desc
+#```
+#
+#---
+#
+##### 1️⃣2️⃣ **PUT - Mettre à jour Social Proof**
+#```
+#Method: PUT
+#URL: {{baseUrl}}/formations/1/social-proof
+#Headers: Content-Type: application/json
+#```
+#
+#**Body (raw JSON) :**
+#```json
+#{
+#    "formationId": 1,
+#    "nombreInscritsAffiche": 12,
+#    "socialProofActif": true
+#}
+#```
+#
+#---
+#
+### 🎯 Réponses attendues
+#
+#### ✅ **Succès (200/201) :**
+#```json
+#{
+#    "success": true,
+#    "message": "Formation créée avec succès",
+#    "data": {
+#        "id": 1,
+#        "nom": "Formation Maquillage Professionnel",
+#        "description": "Une formation complète...",
+#        "slug": "formation-maquillage-professionnel-1234",
+#        "prix": 150000,
+#        "prixReduit": 120000,
+#        "dateCreation": "2025-01-15T10:30:00",
+#        "nombreVues": 0,
+#        "nombreInscriptions": 0,
+#        "active": true
+#    },
+#    "timestamp": "2025-01-15T10:30:15"
+#}
+#```
+#
+#### ❌ **Erreur (400/404) :**
+#```json
+#{
+#    "success": false,
+#    "message": "Formation non trouvée avec l'ID : 999",
+#    "data": null,
+#    "timestamp": "2025-01-15T10:30:15"
+#}
+#```
+#
+#---
+#
+### 🧪 Scénarios de test recommandés
+#
+#### Séquence de test complète :
+#
+#1. **Créer une formation** (POST)
+#2. **Lister les formations** pour vérifier la création (GET)
+#3. **Récupérer par ID** avec incrémentation des vues (GET)
+#4. **Rechercher** la formation créée (GET /search)
+#5. **Enregistrer une demande d'info** (POST)
+#6. **Enregistrer une inscription** (POST)
+#7. **Modifier la formation** (PUT)
+#8. **Mettre à jour le social proof** (PUT)
+#9. **Voir la liste admin** (GET /admin)
+#10. **Supprimer la formation** (DELETE)
+#
+#### Tests d'erreur :
+#
+#- Formation inexistante (ID 999)
+#- Paramètres invalides
+#- Headers manquants pour admin
+#- Body JSON malformé
+#
+#### Tests de pagination :
+#
+#- `?page=0&size=5`
+#- `?page=1&size=10`
+#- `?sortBy=prix&sortDir=desc`
+#
+#### Tests de filtres :
+#
+#- Par catégorie
+#- Par plage de prix
+#- Promotions uniquement
+#- Avec certificat uniquement
 
-###
 
-GET http://localhost:8081/api/health
-
-
+#test2

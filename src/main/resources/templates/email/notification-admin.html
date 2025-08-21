@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouveau message reçu</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; color: #333; }
+        .container { max-width: 600px; margin: 20px auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e1e4e8; }
+        .header { background: #1F2937; color: #fff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 22px; }
+        .logo { margin-bottom: 15px; }
+        .logo img { max-height: 50px; width: auto; }
+        .content { padding: 25px; }
+        .urgent { background: #FEE2E2; border-left: 4px solid #EF4444; }
+        .normal { background: #F9FAFB; border-left: 4px solid #6B7280; }
+        .message-section { background: #fff; border-radius: 6px; padding: 15px; margin-bottom: 15px; border: 1px solid #e5e7eb; }
+        .btn { display: inline-block; padding: 12px 25px; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .primary-btn { background: #3B82F6; }
+        .urgent-btn { background: #EF4444; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <img src="/Beauty's Empire.png" alt="Beauty's Empire Logo" />
+        </div>
+        <h1 th:if="${isUrgent}">🔴 Message URGENT reçu</h1>
+        <h1 th:unless="${isUrgent}">📩 Nouveau message</h1>
+        <p th:text="${typeLibelle}">Type de message</p>
+    </div>
+    <div class="content" th:class="${isUrgent} ? 'content urgent' : 'content normal'">
+        <div class="message-section">
+            <h3>👤 Informations contact</h3>
+            <p><strong>Nom :</strong> <span th:text="${message.nom}">Nom</span></p>
+            <p><strong>Email :</strong> <span th:text="${message.email}">Email</span></p>
+            <p th:if="${message.telephone}"><strong>Téléphone :</strong> <span th:text="${message.telephone}">Téléphone</span></p>
+            <p th:if="${message.ville}"><strong>Ville :</strong> <span th:text="${message.ville}">Ville</span></p>
+        </div>
+        <div class="message-section" th:if="${message.formationNom}">
+            <h3>🎓 Formation concernée</h3>
+            <p th:text="${message.formationNom}">Formation</p>
+        </div>
+        <div class="message-section">
+            <h3>💬 Message</h3>
+            <p><strong>Sujet :</strong> <span th:text="${message.sujet}">Sujet</span></p>
+            <div style="background: #F9FAFB; padding: 12px; border-radius: 4px; margin-top: 10px;">
+                <p th:text="${message.message}">Contenu du message</p>
+            </div>
+        </div>
+        <div class="message-section" th:if="${message.disponibilites}">
+            <h3>📅 Disponibilités</h3>
+            <p th:text="${message.disponibilites}">Disponibilités</p>
+        </div>
+        <div class="message-section">
+            <h3>📊 Informations techniques</h3>
+            <p><strong>Reçu le :</strong> <span th:text="${dateMessage}">Date</span></p>
+            <p th:if="${message.sourceVisite}"><strong>Source :</strong> <span th:text="${message.sourceVisite}">Source</span></p>
+            <p th:if="${message.adresseIP}"><strong>IP :</strong> <span th:text="${message.adresseIP}">IP</span></p>
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+            <a th:href="${adminUrl}" th:class="${isUrgent} ? 'btn urgent-btn' : 'btn primary-btn'">
+                <span th:if="${isUrgent}">🚨 TRAITER MAINTENANT</span>
+                <span th:unless="${isUrgent}">👀 Voir dans l'admin</span>
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

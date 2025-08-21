@@ -1,0 +1,23 @@
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jackeboyeur244@gmail.com
+    password: suwlzalbfgktexwk
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+app:
+  name: "Institut Beauty's Empire"
+  website: "https://beautysempire.cm"
+  email:
+    enabled: true
+    from: jackeboyeur244@gmail.com
+    admin: jackeboyeur244@gmail.com
