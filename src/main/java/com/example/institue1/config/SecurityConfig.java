@@ -18,7 +18,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Désactiver CSRF pour plus de simplicité (attention en production)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/**").permitAll() // Autoriser toutes les requêtes pour l'instant
+                        .requestMatchers("/api/**").permitAll() // Autoriser toutes les requêtes pour l'instant
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));

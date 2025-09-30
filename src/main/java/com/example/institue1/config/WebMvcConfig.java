@@ -24,6 +24,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadAbsolutePath + "/");
+        registry.setOrder(1);
 
         log.info("Dossier d'uploads configuré: {}", uploadAbsolutePath);
     }
