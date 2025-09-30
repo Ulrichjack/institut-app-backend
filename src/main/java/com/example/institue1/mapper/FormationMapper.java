@@ -2,6 +2,7 @@ package com.example.institue1.mapper;
 
 
 import com.example.institue1.dto.formation.*;
+import com.example.institue1.dto.gallery.GalleryImageDto;
 import com.example.institue1.model.Formation;
 import com.example.institue1.utils.FormationUtils;
 import org.springframework.stereotype.Component;
@@ -72,7 +73,20 @@ public class FormationMapper {
                 .formationComplete(formationUtils.isFormationComplete(formation))
                 .photoPrincipale(formation.getPhotoPrincipale())
                 .photosGalerie(formation.getPhotosGalerie())
-                .videoPresentation(formation.getVideoPresentation())
+                .imagesGalerie(
+                        formation.getGalleryImages() == null ? null :
+                                formation.getGalleryImages().stream()
+                                        .map(img -> {
+                                            GalleryImageDto dto = new GalleryImageDto();
+                                            dto.setId(img.getId());
+                                            dto.setUrl(img.getUrl());
+                                            dto.setTitre(img.getTitre());
+                                            dto.setDescription(img.getDescription());
+                                            dto.setCategorie(img.getCategorie());
+                                            return dto;
+                                        })
+                                        .collect(Collectors.toList())
+                )
                 .enPromotion(formation.getEnPromotion())
                 .pourcentageReduction(formation.getPourcentageReduction())
                 .promoActive(formationUtils.isPromoActive(formation))
@@ -95,8 +109,8 @@ public class FormationMapper {
                 .id(formation.getId())
                 .nom(formation.getNom())
                 .description(formation.getDescription())
-                .duree(formation.getDuree())
-                .fraisInscription(formation.getFraisInscription())
+                //.duree(formation.getDuree())
+                //.fraisInscription(formation.getFraisInscription())
                 .prix(formation.getPrix())
                 .prixAvecReduction(formationUtils.getPrixAvecReduction(formation))
                 .categorie(formation.getCategorie())
@@ -119,7 +133,6 @@ public class FormationMapper {
                 .formationComplete(formationUtils.isFormationComplete(formation))
                 .photoPrincipale(formation.getPhotoPrincipale())
                 .photosGalerie(formation.getPhotosGalerie())
-                .videoPresentation(formation.getVideoPresentation())
                 .enPromotion(formation.getEnPromotion())
                 .pourcentageReduction(formation.getPourcentageReduction())
                 .promoActive(formationUtils.isPromoActive(formation))
@@ -139,9 +152,7 @@ public class FormationMapper {
                 .build();
     }
 
-    /**
-     * Conversion vers SocialProofDto
-     */
+    //Conversion vers SocialProofDto
     public SocialProofDto toSocialProofDto(Formation formation) {
         return SocialProofDto.builder()
                 .formationId(formation.getId())
@@ -158,9 +169,8 @@ public class FormationMapper {
 
     // === CONVERSION DEPUIS DTOS ===
 
-    /**
-     * Conversion depuis FormationCreateDto vers Formation
-     */
+    //Conversion depuis FormationCreateDto vers Formation
+
     public Formation fromCreateDto(FormationCreateDto dto) {
         Formation formation = Formation.builder()
                 .nom(dto.getNom())
@@ -182,7 +192,6 @@ public class FormationMapper {
                 .socialProofActif(dto.getSocialProofActif())
                 .photoPrincipale(dto.getPhotoPrincipale())
                 .photosGalerie(dto.getPhotosGalerie())
-                .videoPresentation(dto.getVideoPresentation())
                 .enPromotion(dto.getEnPromotion())
                 .pourcentageReduction(dto.getPourcentageReduction())
                 .dateDebutPromo(dto.getDateDebutPromo())
@@ -227,7 +236,6 @@ public class FormationMapper {
         if (dto.getSocialProofActif() != null) formation.setSocialProofActif(dto.getSocialProofActif());
         if (dto.getPhotoPrincipale() != null) formation.setPhotoPrincipale(dto.getPhotoPrincipale());
         if (dto.getPhotosGalerie() != null) formation.setPhotosGalerie(dto.getPhotosGalerie());
-        if (dto.getVideoPresentation() != null) formation.setVideoPresentation(dto.getVideoPresentation());
         if (dto.getEnPromotion() != null) formation.setEnPromotion(dto.getEnPromotion());
         if (dto.getPourcentageReduction() != null) formation.setPourcentageReduction(dto.getPourcentageReduction());
         if (dto.getDateDebutPromo() != null) formation.setDateDebutPromo(dto.getDateDebutPromo());

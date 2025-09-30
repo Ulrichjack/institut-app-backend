@@ -1,5 +1,6 @@
 package com.example.institue1.dto.formation;
 
+import com.example.institue1.dto.gallery.GalleryImageDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,8 +49,7 @@ public class FormationDetailDto {
     // === MÉDIAS ===
     private String photoPrincipale;
     private List<String> photosGalerie;
-    private String videoPresentation;
-
+    private List<GalleryImageDto> imagesGalerie;
     // === PROMOTION ===
     private Boolean enPromotion;
     private BigDecimal pourcentageReduction;

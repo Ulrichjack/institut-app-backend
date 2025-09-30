@@ -5,8 +5,10 @@ import com.example.institue1.dto.formation.*;
 import com.example.institue1.exception.FormationNotFoundException;
 import com.example.institue1.mapper.FormationMapper;
 import com.example.institue1.model.Formation;
+import com.example.institue1.model.GalleryImage;
 import com.example.institue1.repository.FormationRepository;
 import com.example.institue1.repository.FormationSpecifications;
+import com.example.institue1.repository.GalleryImageRepository;
 import com.example.institue1.utils.FormationUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +29,19 @@ public class FormationService {
     private  final FormationRepository formationRepository;
     private final FormationMapper formationMapper;
     private final FormationUtils formationUtils;
+    private final GalleryImageRepository galleryImageRepository;
 
-    public FormationService(FormationRepository formationRepository, FormationMapper formationMapper, FormationUtils formationUtils) {
+    public FormationService(FormationRepository formationRepository,
+                            FormationMapper formationMapper,
+                            FormationUtils formationUtils,
+                            GalleryImageRepository galleryImageRepository) {
         this.formationRepository = formationRepository;
         this.formationMapper = formationMapper;
         this.formationUtils = formationUtils;
+        this.galleryImageRepository =galleryImageRepository;
     }
 
-    public FormationDetailDto createFormation(FormationCreateDto createDto, String adminCreateur ){
+     public FormationDetailDto createFormation(FormationCreateDto createDto, String adminCreateur ){
         log.info("Création d'une nouvelle formation : {}", createDto.getNom());
 
         Formation formation = formationMapper.fromCreateDto(createDto);
@@ -43,6 +50,23 @@ public class FormationService {
         formation.setModifiePar(adminCreateur);
 
         Formation formationSauvee = formationRepository.save(formation);
+
+        // === AJOUT DES IMAGES DE GALERIE ===
+        if (createDto.getPhotosGalerie() != null && !createDto.getPhotosGalerie().isEmpty()) {
+            for (String imageUrl : createDto.getPhotosGalerie()) {
+                GalleryImage image = GalleryImage.builder()
+                        .titre(formation.getNom() + " - Galerie")
+                        .description("Image associée à la formation " + formation.getNom())
+                        .categorie("FORMATION")
+                        .url(imageUrl)
+                        .isPublic(true)
+                        .formation(formationSauvee) // association directe
+                        .build();
+                galleryImageRepository.save(image);
+            }
+        }
+
+
         log.info("Formation créée avec succès - ID: {}, Slug: {}",
                 formationSauvee.getId(), formationSauvee.getSlug());
 
@@ -53,7 +77,7 @@ public class FormationService {
     public Optional<FormationDetailDto> getFormationById(Long id, boolean incrementerVues) {
         log.debug("Recherche formation par ID : {}", id);
 
-        return formationRepository.findById(id)
+        return formationRepository.findByIdWithGalleryImages(id)
                 .map(formation -> {
                     // Incrémenter les vues si demandé
                     if (incrementerVues) {
@@ -69,7 +93,7 @@ public class FormationService {
     public Optional<FormationDetailDto> getFormationBySlug(String slug, boolean incrementerVues) {
         log.debug("Recherche formation par slug : {}", slug);
 
-        return formationRepository.findBySlugAndActiveTrue(slug)
+        return formationRepository.findBySlugWithGalleryImages(slug)
                 .map(formation -> {
                     if (incrementerVues) {
                         formationUtils.incrementerVues(formation);
@@ -121,6 +145,7 @@ public class FormationService {
 
         return new PageImpl<>(formationsDto, pageable, formations.getTotalElements());
     }
+
 
     @Transactional(readOnly = true)
     public Page<FormationAdminDto> listAllFormations(Pageable pageable) {

@@ -24,6 +24,7 @@ public class FormationListDto {
 
     // === MÉDIAS ===
     private String photoPrincipale;
+    private Integer nombreImages;
 
     // === PLACES (avec social proof) ===
     private Integer nombrePlaces;

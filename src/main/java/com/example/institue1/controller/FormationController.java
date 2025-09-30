@@ -312,6 +312,7 @@ public class FormationController {
     }
 
 
+
     // ==========================================
     // MÉTHODES UTILITAIRES PRIVÉES
     // ==========================================

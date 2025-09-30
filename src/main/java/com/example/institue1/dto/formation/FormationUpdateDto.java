@@ -50,7 +50,6 @@ public class FormationUpdateDto {
     private Boolean socialProofActif;
     private String photoPrincipale;
     private List<String> photosGalerie;
-    private String videoPresentation;
     private Boolean enPromotion;
 
     @DecimalMin(value = "0.0", message = "Le pourcentage de réduction doit être positif")

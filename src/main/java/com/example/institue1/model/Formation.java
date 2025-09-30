@@ -115,8 +115,6 @@ public class Formation {
     @Column(name = "photo_url")
     private List<String> photosGalerie = new ArrayList<>(); // Galerie photos
 
-    @Column(length = 255)
-    private String videoPresentation; // URL vidéo de présentation
 
     // === STATUT ET GESTION ===
     @Column(nullable = false)
@@ -203,5 +201,7 @@ public class Formation {
         // Ajouter timestamp si besoin d'unicité
         return baseSlug + "-" + System.currentTimeMillis() % 10000;
     }
+
+
 
 }

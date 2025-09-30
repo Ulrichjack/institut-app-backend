@@ -1,7 +1,6 @@
 package com.example.institue1.service;
 
 import com.example.institue1.dto.contactInscription.*;
-import com.example.institue1.dto.whatsapp.WhatsAppResponseDto;
 import com.example.institue1.enums.StatutMessage;
 import com.example.institue1.enums.TypeMessage;
 import com.example.institue1.mapper.MessageMapper;
@@ -22,95 +21,131 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// Service métier pour la gestion des messages
+// Responsabilité: CRUD messages, logique métier, statistiques
 @Service
+@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class MessageService {
+
     private final MessageRepository messageRepository;
     private final FormationRepository formationRepository;
     private final MessageMapper messageMapper;
-    private final EmailService emailService;
-    private final WhatsAppService whatsAppService;
+    private final NotificationService notificationService;
 
-    public MessageService (MessageRepository messageRepository,
-                           FormationRepository formationRepository,
-                           MessageMapper messageMapper,
-                           EmailService emailService,
-                           WhatsAppService whatsAppService){
-        this.emailService = emailService;
-        this.formationRepository = formationRepository;
-        this.messageMapper =messageMapper;
-        this.messageRepository = messageRepository;
-        this.whatsAppService = whatsAppService;
-    }
+    // === CRÉATION MESSAGES ===
 
     public MessageDetailDto creerContact(ContactCreateDto dto) {
-        log.info("Création nouveau contact de: {}", dto.getEmail());
+        log.info("Création contact de: {}", dto.getEmail());
 
+        // Mapping et enrichissement
         Message message = messageMapper.fromContactCreateDto(dto);
         message.setType(TypeMessage.CONTACT_GENERAL);
-        // Enrichissement automatique
         enrichirMessage(message, dto.getSourceVisite(), dto.getAdresseIP(), dto.getUserAgent());
-        // Si formation spécifiée, la récupérer
-        if (dto.getFormationId() != null) {
-            Formation formation = formationRepository.findById(dto.getFormationId())
-                    .orElse(null);
-            message.setFormationInteresse(formation);
-            if (formation != null) {
-                message.setFormationNom(formation.getNom());
-            }
-        }
+
+        // Formation optionnelle
+        attacherFormation(message, dto.getFormationId());
+
         // Sauvegarde
         Message saved = messageRepository.save(message);
-        // Notifications asynchrones
-        envoyerNotifications(saved);
-        log.info("Contact créé avec ID: {}", saved.getId());
+
+        // Notifications asynchrones (ne bloque pas la réponse)
+        notificationService.notifierNouveauContact(saved);
+
+        log.info("Contact créé ID: {}", saved.getId());
         return messageMapper.toDetailDto(saved);
     }
 
     public MessageDetailDto creerPreInscription(PreInscriptionCreateDto dto) {
-        log.info("Création pré-inscription pour formation ID: {}", dto.getFormationId());
-        // Récupération formation obligatoire
+        log.info("Création pré-inscription formation ID: {}", dto.getFormationId());
+
+        // Formation obligatoire pour pré-inscription
         Formation formation = formationRepository.findById(dto.getFormationId())
                 .orElseThrow(() -> new EntityNotFoundException("Formation introuvable ID: " + dto.getFormationId()));
+
+        // Mapping et enrichissement
         Message message = messageMapper.fromPreInscriptionCreateDto(dto, formation);
         message.setType(TypeMessage.PRE_INSCRIPTION);
-        message.setFormationNom(formation.getNom()); // Sauvegarde historique
-        // Enrichissement
+        message.setFormationNom(formation.getNom()); // Backup historique
         enrichirMessage(message, dto.getSourceVisite(), dto.getAdresseIP(), dto.getUserAgent());
-        // Génération sujet automatique si vide
-        if (message.getSujet() == null || message.getSujet().trim().isEmpty()) {
+
+        // Sujet automatique si manquant
+        if (isBlank(message.getSujet())) {
             message.setSujet(MessageUtils.genererSujetAuto(TypeMessage.PRE_INSCRIPTION, formation.getNom()));
         }
+
+        // Sauvegarde
         Message saved = messageRepository.save(message);
-        // Notifications prioritaires pour pré-inscriptions
-        envoyerNotifications(saved);
-        log.info("Pré-inscription créée avec ID: {}", saved.getId());
+
+        // Notifications prioritaires asynchrones
+        notificationService.notifierNouvellePreInscription(saved);
+
+        log.info("Pré-inscription créée ID: {}", saved.getId());
         return messageMapper.toDetailDto(saved);
     }
 
+    // === CONSULTATION ===
+
     @Transactional(readOnly = true)
     public Page<MessageListDto> listerMessages(MessageFilterDto filtre, Pageable pageable) {
-        log.debug("Listing messages avec filtres: {}", filtre);
+        log.debug("Liste messages - filtres: {}", filtre);
 
-        Specification<Message> spec = buildSpecification(filtre);
+        Specification<Message> spec = construireSpecification(filtre);
         Page<Message> messages = messageRepository.findAll(spec, pageable);
 
         return messages.map(messageMapper::toListDto);
     }
+
     @Transactional(readOnly = true)
     public MessageDetailDto obtenirMessage(Long id) {
-        Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Message introuvable ID: " + id));
-
+        Message message = findMessageById(id);
         return messageMapper.toDetailDto(message);
     }
+
+    // === GESTION STATUTS ===
+
+    public MessageDetailDto changerStatut(Long id, ChangeStatutDto dto, String admin) {
+        Message message = findMessageById(id);
+        StatutMessage nouveauStatut = StatutMessage.valueOf(dto.getNouveauStatut());
+
+        // Validation transition
+        if (!message.getStatut().peutEvoluerVers(nouveauStatut)) {
+            throw new IllegalStateException(
+                    String.format("Transition impossible: %s -> %s", message.getStatut(), nouveauStatut)
+            );
+        }
+
+        // Application changement
+        appliquerNouveauStatut(message, nouveauStatut, admin);
+
+        // Commentaire optionnel
+        if (!isBlank(dto.getCommentaire())) {
+            log.info("Commentaire admin message {}: {}", id, dto.getCommentaire());
+            // TODO: Système commentaires internes
+        }
+
+        Message saved = messageRepository.save(message);
+        log.info("Statut message {} -> {} par {}", id, nouveauStatut, admin);
+
+        return messageMapper.toDetailDto(saved);
+    }
+
+    public void marquerCommeLu(Long id, String admin) {
+        Message message = findMessageById(id);
+        MessageUtils.marquerCommeLu(message, admin);
+        messageRepository.save(message);
+        log.debug("Message {} marqué lu par {}", id, admin);
+    }
+
+    // === STATISTIQUES ===
 
     @Transactional(readOnly = true)
     public MessageStatsDto obtenirStatistiques() {
         log.debug("Calcul statistiques messages");
 
         MessageStatsDto stats = new MessageStatsDto();
+        LocalDateTime maintenant = LocalDateTime.now();
 
         // Compteurs globaux
         stats.setTotalMessages(messageRepository.count());
@@ -122,64 +157,24 @@ public class MessageService {
         stats.setContactsGeneraux(compterParType(TypeMessage.CONTACT_GENERAL));
         stats.setPreInscriptions(compterParType(TypeMessage.PRE_INSCRIPTION));
 
-        // Urgences et anciens
+        // Urgences et performance
         stats.setMessagesUrgents(compterMessagesUrgents());
         stats.setMessagesAnciens(compterMessagesAnciens());
 
-        // Évolution temporelle
-        LocalDateTime maintenant = LocalDateTime.now();
+        // Evolution temporelle
         stats.setMessagesDuJour(compterDepuis(maintenant.minusDays(1)));
         stats.setMessagesDeLaSemaine(compterDepuis(maintenant.minusWeeks(1)));
         stats.setMessagesDuMois(compterDepuis(maintenant.minusMonths(1)));
 
-        // TODO: Top formations et performances (requêtes complexes)
-        stats.setTopFormations(List.of()); // À implémenter avec des requêtes natives
-        stats.setTauxReponse24h(85.0); // Mock - à calculer réellement
-        stats.setTempsReponseMovenHeures(4.2); // Mock
+        // TODO: Métriques avancées avec requêtes natives
+        stats.setTopFormations(List.of());
+        stats.setTauxReponse24h(85.0); // À calculer réellement
+        stats.setTempsReponseMovenHeures(4.2); // À calculer
 
         return stats;
     }
 
-    public MessageDetailDto changerStatut(Long id, ChangeStatutDto dto, String admin) {
-        Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Message introuvable ID: " + id));
-
-        StatutMessage nouveauStatut = StatutMessage.valueOf(dto.getNouveauStatut());
-
-        // Validation transition
-        if (!message.getStatut().peutEvoluerVers(nouveauStatut)) {
-            throw new IllegalStateException(
-                    String.format("Transition impossible: %s -> %s",
-                            message.getStatut(), nouveauStatut)
-            );
-        }
-
-        // Application du changement avec utilitaires
-        switch (nouveauStatut) {
-            case LU -> MessageUtils.marquerCommeLu(message, admin);
-            case TRAITE -> MessageUtils.marquerCommeTraite(message, admin);
-            case ARCHIVE -> MessageUtils.archiverMessage(message, admin);
-        }
-
-        // Ajout commentaire si fourni
-        if (dto.getCommentaire() != null && !dto.getCommentaire().trim().isEmpty()) {
-            // TODO: Ajouter système de commentaires/notes internes
-            log.info("Commentaire admin sur message {}: {}", id, dto.getCommentaire());
-        }
-
-        Message saved = messageRepository.save(message);
-        log.info("Statut message {} changé vers {} par {}", id, nouveauStatut, admin);
-
-        return messageMapper.toDetailDto(saved);
-    }
-
-    public void marquerCommeLu(Long id, String admin) {
-        Message message = messageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Message introuvable ID: " + id));
-
-        MessageUtils.marquerCommeLu(message, admin);
-        messageRepository.save(message);
-    }
+    // === MÉTHODES PRIVÉES ===
 
     private void enrichirMessage(Message message, String sourceVisite, String adresseIP, String userAgent) {
         message.setSourceVisite(sourceVisite);
@@ -187,54 +182,39 @@ public class MessageService {
         message.setUserAgent(userAgent);
         message.setDateCreation(LocalDateTime.now());
 
-        // Formatage téléphone si fourni
+        // Formatage téléphone
         if (message.getTelephone() != null) {
             message.setTelephone(MessageUtils.formaterTelephone(message.getTelephone()));
         }
 
-        // Sauvegarde nom formation si relation existe
+        // Sauvegarde nom formation pour historique
         MessageUtils.sauvegarderNomFormation(message);
     }
 
-
-    private void envoyerNotifications(Message message) {
-        try {
-            // Priorité à WhatsApp si numéro disponible
-            if (message.getTelephone() != null && !message.getTelephone().isEmpty()) {
-                // Envoi différent selon le type de message
-                WhatsAppResponseDto response;
-
-                if (message.getType() == TypeMessage.PRE_INSCRIPTION) {
-                    response = whatsAppService.envoyerNotificationPreInscription(message);
-                } else {
-                    response = whatsAppService.envoyerNotificationContactGeneral(message);
-                }
-
-                if (response != null) {
-                    message.setWhatsappNotificationEnvoye(true);
-                    message.setDateWhatsappNotification(LocalDateTime.now());
-                }
+    private void attacherFormation(Message message, Long formationId) {
+        if (formationId != null) {
+            Formation formation = formationRepository.findById(formationId).orElse(null);
+            message.setFormationInteresse(formation);
+            if (formation != null) {
+                message.setFormationNom(formation.getNom());
             }
-
-            // Email toujours envoyé comme backup formel
-            emailService.envoyerConfirmationContact(message);
-            message.setEmailConfirmationEnvoye(true);
-            message.setDateEmailConfirmation(LocalDateTime.now());
-
-            // Notification admin par email
-            emailService.notifierNouveauMessage(message);
-
-            // Notification WhatsApp pour admin si message urgent
-            if (message.getType().isUrgent() || message.getType().necessiteNotificationWhatsApp()) {
-                whatsAppService.envoyerAlertAdminNouveauMessage(message);
-            }
-
-        } catch (Exception e) {
-            log.error("Erreur envoi notifications pour message {}: {}",
-                    message.getId(), e.getMessage());
         }
     }
-    private Specification<Message> buildSpecification(MessageFilterDto filtre) {
+
+    private void appliquerNouveauStatut(Message message, StatutMessage nouveauStatut, String admin) {
+        switch (nouveauStatut) {
+            case LU -> MessageUtils.marquerCommeLu(message, admin);
+            case TRAITE -> MessageUtils.marquerCommeTraite(message, admin);
+            case ARCHIVE -> MessageUtils.archiverMessage(message, admin);
+        }
+    }
+
+    private Message findMessageById(Long id) {
+        return messageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Message introuvable ID: " + id));
+    }
+
+    private Specification<Message> construireSpecification(MessageFilterDto filtre) {
         return (root, query, cb) -> {
             var predicates = cb.conjunction();
 
@@ -248,12 +228,12 @@ public class MessageService {
                         cb.equal(root.get("type"), TypeMessage.valueOf(filtre.getType())));
             }
 
-            if (filtre.getEmail() != null) {
+            if (!isBlank(filtre.getEmail())) {
                 predicates = cb.and(predicates,
                         cb.like(cb.lower(root.get("email")), "%" + filtre.getEmail().toLowerCase() + "%"));
             }
 
-            if (filtre.getFormationNom() != null) {
+            if (!isBlank(filtre.getFormationNom())) {
                 predicates = cb.and(predicates,
                         cb.like(cb.lower(root.get("formationNom")), "%" + filtre.getFormationNom().toLowerCase() + "%"));
             }
@@ -268,7 +248,7 @@ public class MessageService {
                         cb.lessThanOrEqualTo(root.get("dateCreation"), filtre.getDateFin()));
             }
 
-            if (filtre.getSourceVisite() != null) {
+            if (!isBlank(filtre.getSourceVisite())) {
                 predicates = cb.and(predicates,
                         cb.equal(root.get("sourceVisite"), filtre.getSourceVisite()));
             }
@@ -310,5 +290,7 @@ public class MessageService {
                 cb.greaterThanOrEqualTo(root.get("dateCreation"), depuis));
     }
 
-
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 }

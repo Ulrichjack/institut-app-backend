@@ -1,13 +1,13 @@
 package com.example.institue1.service;
 
 import com.example.institue1.model.Message;
+import com.example.institue1.utils.MessageUtils;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -16,202 +16,173 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
-    public EmailService(JavaMailSender mailSender, TemplateEngine templateEngine){
-        this.mailSender =mailSender;
-        this.templateEngine = templateEngine;
-    }
+    @Value("${app.email.from}")
+    private String emailFrom;
 
-    @Value("${app.email.from:contact@beautysempire.cm}")
-    private String fromEmail;
-
-    @Value("${app.email.admin:admin@beautysempire.cm}")
-    private String adminEmail;
+    @Value("${app.email.admin}")
+    private String emailAdmin;
 
     @Value("${app.email.enabled:true}")
     private boolean emailEnabled;
 
-    @Value("${app.name:Institut Beauty's Empire}")
+    @Value("${app.name}")
     private String appName;
 
-    @Value("${app.website:https://beautysempire.cm}")
+    @Value("${app.website}")
     private String websiteUrl;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm");
 
-    // === EMAILS CLIENTS ===
-    @Async
-    public void envoyerConfirmationContact(Message message) {
+    // === EMAILS UTILISATEURS ===
+
+    public void envoyerConfirmationPreInscription(Message message) {
         if (!emailEnabled) {
-            log.debug("Envoi emails désactivé - confirmation contact ignorée");
+            log.debug("Emails désactivés - Skip confirmation pré-inscription");
             return;
         }
 
-        try {
-            Context context = new Context(Locale.FRENCH);
-            context.setVariable("nom", message.getNom());
-            context.setVariable("sujet", message.getSujet() != null ? message.getSujet() : "Votre demande");
-            context.setVariable("appName", appName);
-            context.setVariable("websiteUrl", websiteUrl);
-            context.setVariable("dateMessage", message.getDateCreation().format(FORMATTER));
-            context.setVariable("isPreInscription", message.getType().name().equals("PRE_INSCRIPTION"));
-            context.setVariable("formationNom", message.getFormationNom());
+        Context context = creerContextPreInscription(message);
+        String contenu = templateEngine.process("email/confirmation-preinscription", context);
 
-            String templateName = message.getType().name().equals("PRE_INSCRIPTION")
-                    ? "email/confirmation-preinscription"
-                    : "email/confirmation-contact";
+        envoyerEmail(
+                message.getEmail(),
+                "Confirmation de votre pré-inscription - " + appName,
+                contenu
+        );
 
-            String htmlContent = templateEngine.process(templateName, context);
+        log.info("Email confirmation pré-inscription envoyé à: {}", message.getEmail());
+    }
 
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-            helper.setFrom(fromEmail, appName);
-            helper.setTo(message.getEmail());
-            helper.setSubject(generateConfirmationSubject(message));
-            helper.setText(htmlContent, true);
-
-            // AJOUT DU LOGO
-            try {
-                ClassPathResource logo = new ClassPathResource("static/Beauty's Empire.png");
-                if (logo.exists()) {
-                    helper.addInline("logo", logo);
-                    log.debug("Logo ajouté à l'email de confirmation");
-                } else {
-                    log.warn("Logo non trouvé : static/Beauty's Empire.png");
-                }
-            } catch (Exception e) {
-                log.warn("Impossible d'ajouter le logo : {}", e.getMessage());
-            }
-
-            mailSender.send(mimeMessage);
-            log.info("Email confirmation envoyé à : {}", message.getEmail());
-
-        } catch (Exception e) {
-            log.error("Erreur envoi email confirmation à {}: {}", message.getEmail(), e.getMessage());
+    public void envoyerConfirmationContact(Message message) {
+        if (!emailEnabled) {
+            log.debug("Emails désactivés - Skip confirmation contact");
+            return;
         }
+
+        Context context = creerContextContact(message);
+        String contenu = templateEngine.process("email/confirmation-contact", context);
+
+        envoyerEmail(
+                message.getEmail(),
+                "Confirmation de réception - " + appName,
+                contenu
+        );
+
+        log.info("Email confirmation contact envoyé à: {}", message.getEmail());
     }
 
     // === EMAILS ADMIN ===
-    @Async
-    public void notifierNouveauMessage(Message message) {
+
+    public void notifierNouvellePreInscription(Message message) {
         if (!emailEnabled) {
-            log.debug("Envoi emails désactivé - notification admin ignorée");
+            log.debug("Emails désactivés - Skip notification admin");
             return;
         }
 
-        try {
-            Context context = new Context(Locale.FRENCH);
-            context.setVariable("message", message);
-            context.setVariable("appName", appName);
-            context.setVariable("websiteUrl", websiteUrl);
-            context.setVariable("dateMessage", message.getDateCreation().format(FORMATTER));
-            context.setVariable("typeLibelle", message.getType().getLibelle());
-            context.setVariable("isUrgent", message.getType().isUrgent());
-            context.setVariable("adminUrl", websiteUrl + "/admin/messages/" + message.getId());
+        Context context = creerContextNotificationAdmin(message, "Pré-inscription");
+        String contenu = templateEngine.process("email/notification-admin", context);
 
-            String htmlContent = templateEngine.process("email/notification-admin", context);
+        envoyerEmail(
+                emailAdmin,
+                "🚨 Nouvelle pré-inscription - " + message.getFormationNom(),
+                contenu
+        );
 
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-            helper.setFrom(fromEmail, appName);
-            helper.setTo(adminEmail);
-            helper.setSubject(generateNotificationSubject(message));
-            helper.setText(htmlContent, true);
-
-            // AJOUT DU LOGO
-            try {
-                ClassPathResource logo = new ClassPathResource("static/Beauty's Empire.png");
-                if (logo.exists()) {
-                    helper.addInline("logo", logo);
-                    log.debug("Logo ajouté à l'email admin");
-                } else {
-                    log.warn("Logo non trouvé : static/Beauty's Empire.png");
-                }
-            } catch (Exception e) {
-                log.warn("Impossible d'ajouter le logo : {}", e.getMessage());
-            }
-
-            // Marquer comme prioritaire si urgent
-            if (message.getType().isUrgent()) {
-                helper.setPriority(1);
-            }
-
-            mailSender.send(mimeMessage);
-            log.info("Notification admin envoyée pour message ID: {}", message.getId());
-
-        } catch (Exception e) {
-            log.error("Erreur envoi notification admin pour message {}: {}", message.getId(), e.getMessage());
-        }
+        log.info("Notification admin pré-inscription envoyée pour ID: {}", message.getId());
     }
 
-    @Async
-    public void envoyerRelancePreInscription(Message message) {
-        if (!emailEnabled || !message.getType().name().equals("PRE_INSCRIPTION")) {
+    public void notifierNouveauContact(Message message) {
+        if (!emailEnabled) {
+            log.debug("Emails désactivés - Skip notification admin");
             return;
         }
 
+        Context context = creerContextNotificationAdmin(message, "Contact général");
+        String contenu = templateEngine.process("email/notification-admin", context);
+
+        envoyerEmail(
+                emailAdmin,
+                "📩 Nouveau message - " + message.getSujet(),
+                contenu
+        );
+
+        log.info("Notification admin contact envoyée pour ID: {}", message.getId());
+    }
+
+    // === UTILITAIRES PRIVÉS ===
+
+    private void envoyerEmail(String destinataire, String sujet, String contenuHtml) {
         try {
-            Context context = new Context(Locale.FRENCH);
-            context.setVariable("nom", message.getNom());
-            context.setVariable("formationNom", message.getFormationNom());
-            context.setVariable("appName", appName);
-            context.setVariable("websiteUrl", websiteUrl);
-            context.setVariable("telephone", getContactTelephone());
-
-            String htmlContent = templateEngine.process("email/relance-preinscription", context);
-
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            helper.setFrom(fromEmail, appName);
-            helper.setTo(message.getEmail());
-            helper.setSubject("🎓 Suite à votre pré-inscription - " + message.getFormationNom());
-            helper.setText(htmlContent, true);
-
-            // AJOUT DU LOGO
-            try {
-                ClassPathResource logo = new ClassPathResource("static/Beauty's Empire.png");
-                if (logo.exists()) {
-                    helper.addInline("logo", logo);
-                    log.debug("Logo ajouté à l'email de relance");
-                } else {
-                    log.warn("Logo non trouvé : static/Beauty's Empire.png");
-                }
-            } catch (Exception e) {
-                log.warn("Impossible d'ajouter le logo : {}", e.getMessage());
-            }
+            helper.setFrom(emailFrom);
+            helper.setTo(destinataire);
+            helper.setSubject(sujet);
+            helper.setText(contenuHtml, true);
 
             mailSender.send(mimeMessage);
-            log.info("Email relance envoyé à : {} pour formation: {}", message.getEmail(), message.getFormationNom());
 
         } catch (Exception e) {
-            log.error("Erreur envoi relance à {}: {}", message.getEmail(), e.getMessage());
+            log.error("Erreur envoi email vers {}: {}", destinataire, e.getMessage());
+            throw new RuntimeException("Erreur envoi email", e);
         }
     }
 
-    private String generateConfirmationSubject(Message message) {
-        if (message.getType().name().equals("PRE_INSCRIPTION")) {
-            return "✅ Pré-inscription reçue - " + (message.getFormationNom() != null ? message.getFormationNom() : "Formation");
+    private Context creerContextPreInscription(Message message) {
+        Context context = new Context(Locale.FRENCH);
+        context.setVariable("nom", message.getNom());
+        context.setVariable("formationNom", message.getFormationNom());
+        context.setVariable("appName", appName);
+        context.setVariable("websiteUrl", websiteUrl);
+        context.setVariable("dateMessage", message.getDateCreation().format(DATE_FORMATTER));
+        return context;
+    }
+
+    private Context creerContextContact(Message message) {
+        Context context = new Context(Locale.FRENCH);
+        context.setVariable("nom", message.getNom());
+        context.setVariable("sujet", message.getSujet());
+        context.setVariable("appName", appName);
+        context.setVariable("websiteUrl", websiteUrl);
+        context.setVariable("dateMessage", message.getDateCreation().format(DATE_FORMATTER));
+        return context;
+    }
+
+    private Context creerContextNotificationAdmin(Message message, String typeLibelle) {
+        Context context = new Context(Locale.FRENCH);
+        context.setVariable("message", message);
+        context.setVariable("typeLibelle", typeLibelle);
+        context.setVariable("appName", appName);
+        context.setVariable("dateMessage", message.getDateCreation().format(DATE_FORMATTER));
+        context.setVariable("isUrgent", MessageUtils.isUrgent(message));
+        context.setVariable("adminUrl", websiteUrl + "/admin/messages/" + message.getId());
+        return context;
+    }
+
+    // === TESTS ET MONITORING ===
+
+    public boolean testerConfiguration() {
+        if (!emailEnabled) {
+            log.warn("Service email désactivé");
+            return false;
         }
-        return "✅ Votre message a été reçu - " + appName;
-    }
 
-    private String generateNotificationSubject(Message message) {
-        String prefix = message.getType().isUrgent() ? "🔴 URGENT - " : "📩 ";
-        String type = message.getType().getLibelle();
-        String formation = message.getFormationNom() != null ? " - " + message.getFormationNom() : "";
+        try {
+            envoyerEmail(emailAdmin, "Test email - " + appName, "Test de configuration réussi");
+            log.info("Test email envoyé avec succès");
+            return true;
 
-        return prefix + type + formation + " (" + message.getNom() + ")";
-    }
-
-    private String getContactTelephone() {
-        return "+237 6XX XX XX XX"; // À configurer via properties
+        } catch (Exception e) {
+            log.error("Test email échoué: {}", e.getMessage());
+            return false;
+        }
     }
 }

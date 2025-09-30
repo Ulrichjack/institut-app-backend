@@ -66,7 +66,6 @@ public class FormationCreateDto {
     // === MÉDIAS ===
     private String photoPrincipale;
     private List<String> photosGalerie = new ArrayList<>();
-    private String videoPresentation;
 
     // === PROMOTION ===
     private Boolean enPromotion = false;

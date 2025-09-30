@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation message</title>
+    <title>Confirmation d'inscription à la Newsletter</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; }
         .container { max-width: 600px; margin: 20px auto; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e1e4e8; }
-        .header { background: linear-gradient(135deg, #8B5CF6, #A855F7); color: #fff; padding: 25px; text-align: center; }
+        .header { background: linear-gradient(135deg, #8B5CF6, #efefef); color: #fff; padding: 25px; text-align: center; }
         .logo { margin-bottom: 15px; }
-        .logo img { max-height: 60px; width: auto; }
+        .logo img { max-height: 100px; width: auto; }
         .content { padding: 25px; }
-        .highlight { background: #fff; padding: 15px; border-left: 4px solid #8B5CF6; border-radius: 6px; border: 1px solid #e5e7eb; }
+        .highlight { background: #fff; padding: 15px; border-left: 4px solid #8B5CF6; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 15px; }
         .btn { display: inline-block; background: #8B5CF6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; }
         .footer { background: #f9fafb; padding: 15px; text-align: center; font-size: 13px; color: #666; }
     </style>
@@ -20,28 +20,23 @@
 <div class="container">
     <div class="header">
         <div class="logo">
-            <img src="/Beauty's Empire.png" alt="Beauty's Empire Logo" />
+            <img src="/static/Beauty's%20Empire.png" alt="Beauty's Empire Logo" />
         </div>
-        <h1 th:text="${appName}">Institut Beauty's Empire</h1>
-        <p>✅ Votre message a été reçu</p>
+        <h1>📰 Inscription à la Newsletter confirmée !</h1>
+        <p th:text="${appName}">Institut Beauty's Empire</p>
     </div>
     <div class="content">
         <p>Bonjour <strong th:text="${nom}">Client</strong>,</p>
-        <p>Nous avons bien reçu votre message concernant : <strong th:text="${sujet}">Votre demande</strong></p>
-        <p>Nous vous répondrons sous 24h ouvrées.</p>
+        <p>Merci pour votre inscription à notre newsletter ! Vous recevrez désormais toutes les nouveautés sur nos formations, promotions et évènements.</p>
         <div class="highlight">
-            <h3>📞 Contact urgent</h3>
-            <ul>
-                <li>📱 WhatsApp : +237 6XX XX XX XX</li>
-                <li>☎️ Téléphone : +237 2XX XX XX XX</li>
-                <li>📧 Email : contact@beautysempire.cm</li>
-            </ul>
+            <h3>📄 Catalogue en pièce jointe</h3>
+            <p>Veuillez trouver en pièce jointe le <strong>catalogue complet de nos formations</strong>. Découvrez nos offres et choisissez la formation qui vous correspond.</p>
         </div>
-        <p style="margin-top: 20px;">Découvrez nos formations :</p>
+        <p>Vous pouvez également consulter nos formations en ligne :</p>
         <a th:href="${websiteUrl}" class="btn">Voir nos formations</a>
     </div>
     <div class="footer">
-        Reçu le <span th:text="${dateMessage}">date</span><br>
+        Inscription enregistrée le <span th:text="${dateInscription}">date</span><br>
         <span th:text="${appName}">Institut Beauty's Empire</span> – Yaoundé, Cameroun
     </div>
 </div>
