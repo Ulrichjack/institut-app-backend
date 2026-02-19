@@ -10,7 +10,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Étape 2: Image finale légère avec seulement le JAR
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-focal
 WORKDIR /app
 
 # Copie le JAR compilé depuis l'étape de build
