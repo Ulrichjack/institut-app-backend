@@ -1,0 +1,1 @@
+ALTER TABLE gallery_images ADD COLUMN cloudinary_public_id VARCHAR(200);
