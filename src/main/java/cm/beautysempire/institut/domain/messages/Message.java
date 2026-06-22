@@ -1,4 +1,4 @@
-package cm.beautysempire.institue1.domain.messages;
+package cm.beautysempire.institut.domain.messages;
 
 
 import lombok.*;

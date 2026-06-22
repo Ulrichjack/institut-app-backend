@@ -1,4 +1,4 @@
-package cm.beautysempire.institue1.domain.formation;
+package cm.beautysempire.institut.domain.formation;
 
 import java.util.List;
 import java.util.Optional;

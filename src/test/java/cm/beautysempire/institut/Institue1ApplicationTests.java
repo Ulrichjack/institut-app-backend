@@ -1,4 +1,4 @@
-package cm.beautysempire.institue1;
+package cm.beautysempire.institut;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

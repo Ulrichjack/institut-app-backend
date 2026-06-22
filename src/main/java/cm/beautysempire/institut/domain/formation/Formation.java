@@ -1,4 +1,4 @@
-package cm.beautysempire.institue1.domain.formation;
+package cm.beautysempire.institut.domain.formation;
 
 import lombok.*;
 
@@ -22,40 +22,33 @@ public class Formation {
     private BigDecimal prix;
     private String categorie;
 
-    // Certificat
     private Boolean certificatDelivre;
     private String nomCertificat;
 
-    // Pédagogie
     private String programme;
     private String objectifs;
     private String materielFourni;
 
-    // Sessions (Les nouveaux champs !)
     private LocalDate dateDemarrage;
     private LocalDate dateFinInscription;
     private String joursFormation;
     private String horaires;
     private String frequence;
 
-    // Places & Social Proof
     private Integer nombrePlaces;
     private Integer nombreInscritsReel;
     private Integer nombreInscritsAffiche;
     private Boolean socialProofActif;
 
-    // Médias
     private String photoPrincipale;
     private List<String> photosGalerie;
 
-    // Statut & Promo
     private Boolean active;
     private Boolean enPromotion;
     private BigDecimal pourcentageReduction;
     private LocalDateTime dateDebutPromo;
     private LocalDateTime dateFinPromo;
 
-    // Métadonnées & Stats
     private LocalDateTime dateCreation;
     private LocalDateTime dateMiseAJour;
     private String creeParAdmin;
@@ -64,7 +57,6 @@ public class Formation {
     private Integer nombreDemandesInfo;
     private Integer nombreInscriptions;
 
-    // SEO
     private String metaTitle;
     private String metaDescription;
     private String slug;
@@ -120,5 +112,23 @@ public class Formation {
         LocalDateTime now = LocalDateTime.now();
         return (dateDebutPromo == null || now.isAfter(dateDebutPromo)) &&
                 (dateFinPromo == null || now.isBefore(dateFinPromo));
+    }
+
+    public void initialiserCreation(String admin) {
+        this.dateCreation = LocalDateTime.now();
+        this.creeParAdmin = admin;
+        this.modifiePar = admin;
+        this.active = true;
+
+        // Sécurité absolue contre les NULL pour la Base de données
+        if (this.nombreInscritsReel == null) this.nombreInscritsReel = 0;
+        if (this.nombreInscritsAffiche == null) this.nombreInscritsAffiche = 0;
+        if (this.nombreInscriptions == null) this.nombreInscriptions = 0;
+        if (this.nombreVues == null) this.nombreVues = 0;
+        if (this.nombreDemandesInfo == null) this.nombreDemandesInfo = 0;
+        if (this.certificatDelivre == null) this.certificatDelivre = true;
+        if (this.socialProofActif == null) this.socialProofActif = false;
+        if (this.enPromotion == null) this.enPromotion = false;
+        if (this.pourcentageReduction == null) this.pourcentageReduction = BigDecimal.ZERO;
     }
 }
