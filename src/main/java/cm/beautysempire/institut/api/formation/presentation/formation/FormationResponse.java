@@ -29,4 +29,5 @@ public class FormationResponse {
     private List<String> photosGalerie;
 
     private Boolean isPromoActive; // Champ calculé par le domaine !
+    private String slug;
 }

@@ -1,0 +1,1 @@
+ALTER TABLE messages ADD COLUMN quartier VARCHAR(100);

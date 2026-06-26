@@ -1,6 +1,6 @@
 // Fichier : src/main/java/cm/beautysempire/institut/api/formation/presentation/shared/ApiResponse.java
 
-package cm.beautysempire.institut.api.formation.presentation.shared;
+package cm.beautysempire.institut.api.shared;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;

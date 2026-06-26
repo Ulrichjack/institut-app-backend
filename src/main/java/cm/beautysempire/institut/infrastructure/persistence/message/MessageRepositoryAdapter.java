@@ -4,6 +4,8 @@ import cm.beautysempire.institut.domain.messages.Message;
 import cm.beautysempire.institut.domain.messages.MessageRepositoryPort;
 import cm.beautysempire.institut.domain.messages.StatutMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,10 +32,9 @@ public class MessageRepositoryAdapter implements MessageRepositoryPort {
     }
 
     @Override
-    public List<Message> findAll() {
-        return jpaRepository.findAll().stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Message> findAll(Pageable pageable) {
+        return jpaRepository.findAll(pageable)
+                .map(mapper::toDomain);
     }
 
     @Override

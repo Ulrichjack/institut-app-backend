@@ -1,5 +1,8 @@
 package cm.beautysempire.institut.domain.formation;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,13 +14,16 @@ public interface FormationRepositoryPort {
 
     Optional<Formation> findBySlug(String slug);
 
-    List<Formation> findAllActive();
+//    long count();
+//
+//    List<Formation> findAllActive();
 
-    List<Formation> findAll();
 
-    void deleteById(Long id);
+    Page<Formation> findAllActivePaginated(Pageable pageable);
 
-    boolean existsById(Long id);
 
-    long count();
+    boolean existsByNom(String nom);
+
+
+    Page<Formation> searchActiveFormations(String motCle, Pageable pageable);
 }

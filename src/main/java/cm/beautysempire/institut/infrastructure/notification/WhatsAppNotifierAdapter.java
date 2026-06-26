@@ -31,11 +31,28 @@ public class WhatsAppNotifierAdapter implements WhatsAppNotifierPort {
 
     @Override
     public String genererLienConfirmationClient(Message message) {
-        String texte = message.getType() == TypeMessage.PRE_INSCRIPTION
-                ? String.format("Bonjour IBE 😊 Je confirme ma pré-inscription à la formation *%s*. Mon nom : %s.",
-                message.getFormationNom(), message.getNom())
-                : String.format("Bonjour IBE 😊 Suite à mon message sur le site (%s), mon nom : %s.",
-                message.getSujet() != null ? message.getSujet() : "demande d'info", message.getNom());
+        String texte;
+
+        if (message.getType() == TypeMessage.PRE_INSCRIPTION) {
+            texte = String.format(
+                    "Bonjour l'Institut Beauty's Empire ! \n\n" +
+                            "Je m'appelle *%s* et je viens de finaliser ma pré-inscription sur votre site web pour la formation : *%s*.\n\n" +
+                            "Pouvez-vous me confirmer la réception de ma demande et m'indiquer les prochaines étapes ?\n\n" +
+                            "Merci d'avance ! ",
+                    message.getNom(),
+                    message.getFormationNom()
+            );
+        } else {
+            texte = String.format(
+                    "Bonjour l'Institut Beauty's Empire ! \n\n" +
+                            "Je m'appelle *%s* et je vous contacte depuis votre site web concernant : *%s*.\n\n" +
+                            "J'aimerais avoir plus d'informations s'il vous plaît.\n\n" +
+                            "Merci ! ",
+                    message.getNom(),
+                    message.getSujet() != null ? message.getSujet() : "une demande de renseignements"
+            );
+        }
+
         return construireLien(adminNumber, texte);
     }
 

@@ -1,4 +1,4 @@
-CREATE TABLE formations (
+CREATE TABLE IF NOT EXISTS formations (
                             id BIGSERIAL PRIMARY KEY,
                             nom VARCHAR(100) NOT NULL,
                             description TEXT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE messages (
                           type VARCHAR(20) NOT NULL,
                           statut VARCHAR(15) NOT NULL DEFAULT 'NON_LU',
                           nom VARCHAR(100) NOT NULL,
-                          email VARCHAR(150) NOT NULL,
+                          email VARCHAR(150),
                           telephone VARCHAR(20),
                           ville VARCHAR(50),
                           sujet VARCHAR(100),
@@ -79,8 +79,6 @@ CREATE TABLE gallery_images (
 
 CREATE TABLE newsletter_subscriptions (
                                           id BIGSERIAL PRIMARY KEY,
-                                          email VARCHAR(150) NOT NULL UNIQUE,
-                                          date_inscription TIMESTAMP NOT NULL,
-                                          catalogue_envoye BOOLEAN NOT NULL DEFAULT FALSE,
-                                          date_catalogue_envoye TIMESTAMP
+                                          email VARCHAR(200),              -- ✅ OPTIONNEL (pas de NOT NULL)
+                                          date_inscription TIMESTAMP NOT NULL DEFAULT NOW()
 );

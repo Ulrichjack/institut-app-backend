@@ -32,6 +32,7 @@ public class MessageJpaEntity {
     private String email;
     private String telephone;
     private String ville;
+    private String quartier;
 
     private String sujet;
     private String message;

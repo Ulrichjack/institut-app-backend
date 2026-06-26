@@ -23,6 +23,7 @@ public class FormationJpaEntity {
 
     @Version // Pour le verrou optimiste (Flyway V3)
     @Column(nullable = false)
+    @Builder.Default
     private Long version = 0L;
 
     private String nom;

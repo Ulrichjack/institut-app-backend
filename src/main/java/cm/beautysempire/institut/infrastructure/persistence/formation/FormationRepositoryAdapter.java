@@ -3,6 +3,8 @@ package cm.beautysempire.institut.infrastructure.persistence.formation;
 import cm.beautysempire.institut.domain.formation.Formation;
 import cm.beautysempire.institut.domain.formation.FormationRepositoryPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,32 +35,19 @@ public class FormationRepositoryAdapter implements FormationRepositoryPort {
         return jpaRepository.findBySlug(slug).map(mapper::toDomain);
     }
 
+
     @Override
-    public List<Formation> findAllActive() {
-        return jpaRepository.findByActiveTrue().stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Formation> findAllActivePaginated(Pageable pageable) {
+        return jpaRepository.findByActiveTrue(pageable).map(mapper::toDomain);
     }
 
     @Override
-    public List<Formation> findAll() {
-        return jpaRepository.findAll().stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
+    public boolean existsByNom(String nom) {
+        return jpaRepository.existsByNomIgnoreCase(nom);
     }
 
     @Override
-    public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        return jpaRepository.existsById(id);
-    }
-
-    @Override
-    public long count() {
-        return jpaRepository.count();
+    public Page<Formation> searchActiveFormations(String motCle, Pageable pageable) {
+        return jpaRepository.searchByMotCle(motCle, pageable).map(mapper::toDomain);
     }
 }

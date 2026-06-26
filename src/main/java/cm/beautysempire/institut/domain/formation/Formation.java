@@ -29,6 +29,9 @@ public class Formation {
     private String objectifs;
     private String materielFourni;
 
+    @Builder.Default
+    private Long version = 0L;
+
     private LocalDate dateDemarrage;
     private LocalDate dateFinInscription;
     private String joursFormation;
@@ -119,6 +122,7 @@ public class Formation {
         this.creeParAdmin = admin;
         this.modifiePar = admin;
         this.active = true;
+        this.version = 0L;
 
         // Sécurité absolue contre les NULL pour la Base de données
         if (this.nombreInscritsReel == null) this.nombreInscritsReel = 0;
@@ -130,5 +134,74 @@ public class Formation {
         if (this.socialProofActif == null) this.socialProofActif = false;
         if (this.enPromotion == null) this.enPromotion = false;
         if (this.pourcentageReduction == null) this.pourcentageReduction = BigDecimal.ZERO;
+
+        if (this.slug == null || this.slug.trim().isEmpty()) {
+            this.slug = genererSlug(this.nom);
+        }
     }
+    private String genererSlug(String nom) {
+        if (nom == null) return "formation-" + System.currentTimeMillis();
+        return nom.toLowerCase()
+                .replaceAll("[éèêë]", "e")
+                .replaceAll("[àâä]", "a")
+                .replaceAll("[îï]", "i")
+                .replaceAll("[ôö]", "o")
+                .replaceAll("[ùûü]", "u")
+                .replaceAll("[ç]", "c")
+                .replaceAll("[^a-z0-9\\s-]", "") // Retire les caractères spéciaux
+                .replaceAll("\\s+", "-") // Remplace les espaces par des tirets
+                .replaceAll("-+", "-") // Évite les doubles tirets
+                + "-" + (System.currentTimeMillis() % 10000); // Ajoute un ID unique à la fin
+    }
+
+
+    public void mettreAJourInfos(Formation nouvellesInfos, String admin){
+        this.nom = nouvellesInfos.getNom();
+        this.description = nouvellesInfos.getDescription();
+        this.duree = nouvellesInfos.getDuree();
+        this.fraisInscription = nouvellesInfos.getFraisInscription();
+        this.prix = nouvellesInfos.getPrix();
+        this.categorie = nouvellesInfos.getCategorie();
+        this.certificatDelivre = nouvellesInfos.getCertificatDelivre();
+        this.nomCertificat = nouvellesInfos.getNomCertificat();
+        this.programme = nouvellesInfos.getProgramme();
+        this.objectifs = nouvellesInfos.getObjectifs();
+        this.materielFourni = nouvellesInfos.getMaterielFourni();
+        this.dateDemarrage = nouvellesInfos.getDateDemarrage();
+        this.dateFinInscription = nouvellesInfos.getDateFinInscription();
+        this.joursFormation = nouvellesInfos.getJoursFormation();
+        this.horaires = nouvellesInfos.getHoraires();
+        this.frequence = nouvellesInfos.getFrequence();
+        this.nombrePlaces = nouvellesInfos.getNombrePlaces();
+        this.photoPrincipale = nouvellesInfos.getPhotoPrincipale();
+        this.photosGalerie = nouvellesInfos.getPhotosGalerie();
+
+        this.enPromotion = nouvellesInfos.getEnPromotion();
+        this.pourcentageReduction = nouvellesInfos.getPourcentageReduction();
+        this.dateDebutPromo = nouvellesInfos.getDateDebutPromo();
+        this.dateFinPromo = nouvellesInfos.getDateFinPromo();
+
+        this.dateMiseAJour = LocalDateTime.now();
+        this.modifiePar = admin;
+    }
+
+    public void mettreAJourSocialProof(Integer nouveauNombreAffiche, Boolean actif, String admin){
+        this.nombreInscritsAffiche = nouveauNombreAffiche;
+        this.socialProofActif = actif;
+        this.dateMiseAJour = LocalDateTime.now();
+        this.modifiePar = admin;
+    }
+
+    public void desactiver(String admin) {
+        this.active = false;
+        this.dateMiseAJour = LocalDateTime.now();
+        this.modifiePar = admin;
+    }
+
+    public void activer(String admin) {
+        this.active = true;
+        this.dateMiseAJour = LocalDateTime.now();
+        this.modifiePar = admin;
+    }
+
 }

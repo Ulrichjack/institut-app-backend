@@ -24,6 +24,7 @@ public class Message {
     private String email;
     private String telephone;
     private String ville;
+    private String quartier;
 
     //Contenue
     private String sujet;
@@ -43,12 +44,32 @@ public class Message {
     private String adresseIp;
     private String userAgent;
 
+    // === NOTIFICATIONS ===
+    @Builder.Default
+    private Boolean emailConfirmationEnvoye = false; // 🔥 AJOUTE @Builder.Default et = false
+
+    @Builder.Default
+    private Boolean whatsappNotificationEnvoye = false; // 🔥 AJOUTE @Builder.Default et = false
+
+    private LocalDateTime dateEmailConfirmation;
+    private LocalDateTime dateWhatsappNotification;
+
 
     //Logique metier
     public void marquerCommeLu(String admin) {
         validerEtChangerStatut(StatutMessage.LU, admin);
         this.dateLecture = LocalDateTime.now();
     }
+
+    public void initialiserCreation() {
+        this.dateCreation = LocalDateTime.now();
+        this.statut = StatutMessage.NON_LU;
+        this.emailConfirmationEnvoye = false;
+        this.whatsappNotificationEnvoye = false;
+
+
+    }
+
 
     public void marquerCommeTraite(String admin) {
         validerEtChangerStatut(StatutMessage.TRAITE, admin);
