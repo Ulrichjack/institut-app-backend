@@ -10,4 +10,5 @@ public interface NewsletterRepositoryPort {
     Page<NewsletterSubscription> findAll(Pageable pageable);
     Optional<NewsletterSubscription> findById(Long id);
     boolean existsByTelephone(String telephone);
+    long count();
 }

@@ -56,6 +56,12 @@ public class WhatsAppNotifierAdapter implements WhatsAppNotifierPort {
         return construireLien(adminNumber, texte);
     }
 
+    @Override
+    public String genererLienCatalogue() {
+        String texte = "Bonjour l'Institut Beauty's Empire ! Je viens de m'inscrire à la newsletter sur votre site et j'aimerais recevoir le catalogue PDF s'il vous plaît. ";
+        return construireLien(adminNumber, texte);
+    }
+
     private String construireLien(String phone, String texte) {
         if (phone == null) return "";
         String clean = phone.replaceAll("[^0-9]", "");

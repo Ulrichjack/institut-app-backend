@@ -28,6 +28,9 @@ public class NewsletterController {
         NewsletterSubscription savedSubscription = newsletterUseCase.souscrire(subscription);
         NewsletterResponse response = mapper.toResponse(savedSubscription);
 
+        String lienWhatsapp = newsletterUseCase.genererLienWhatsAppCatalogue();
+        response.setWhatsappCatalogueLink(lienWhatsapp);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Inscription à la newsletter réussie"));
     }
@@ -53,4 +56,6 @@ public class NewsletterController {
 
         return ResponseEntity.ok(ApiResponse.success(response, "Abonné marqué comme contacté"));
     }
+
+
 }

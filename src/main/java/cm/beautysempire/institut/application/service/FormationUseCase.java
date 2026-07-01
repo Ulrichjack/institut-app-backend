@@ -99,7 +99,15 @@ public class FormationUseCase {
         formationRepositoryPort.save(formation);
     }
 
+    public Page<Formation> listerToutesFormationsPaginees(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        return formationRepositoryPort.findAllPaginated(pageRequest);
+    }
 
+    public Page<Formation> listerFormationsAdmin(String motCle, String status, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        return formationRepositoryPort.searchAdminFormations(motCle, status, pageRequest);
+    }
 
 
 

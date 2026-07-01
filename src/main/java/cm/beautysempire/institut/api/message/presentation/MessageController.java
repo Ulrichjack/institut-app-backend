@@ -20,12 +20,10 @@ public class MessageController {
 
     @PostMapping("/contact")
     public ResponseEntity<ApiResponse<MessageResponse>> soumettreContact(@Valid @RequestBody ContactCreateRequest request) {
-
         Message message = messageApiMapper.toDomain(request);
         Message savedMessage = messageUseCase.soumettreContact(message);
         String whatsappLink = messageUseCase.genererLienWhatsAppClient(savedMessage);
 
-        // 🔥 On utilise le mapper au lieu du Builder manuel !
         MessageResponse response = messageApiMapper.toResponse(savedMessage, whatsappLink);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -34,29 +32,14 @@ public class MessageController {
 
     @PostMapping("/pre-inscription")
     public ResponseEntity<ApiResponse<MessageResponse>> soumettrePreInscription(@Valid @RequestBody PreInscriptionRequest request) {
-
         Message message = messageApiMapper.toDomain(request);
         Message savedMessage = messageUseCase.soumettrePreInscription(message, request.getFormationId());
         String whatsappLink = messageUseCase.genererLienWhatsAppClient(savedMessage);
 
-        // 🔥 On utilise le mapper ici aussi !
         MessageResponse response = messageApiMapper.toResponse(savedMessage, whatsappLink);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(response, "Pré-inscription enregistrée avec succès"));
-    }
-
-
-    @PatchMapping("/{id}/lu")
-    public ResponseEntity<ApiResponse<Message>> marquerCommeLu(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success(messageUseCase.marquerCommeLu(id, "admin"), "Message marqué comme lu"));
-    }
-
-    @GetMapping("/stats/non-lus")
-    public ResponseEntity<ApiResponse<Long>> compterNonLus() {
-
-       Long response =  messageUseCase.compterMessagesNonLus();
-        return ResponseEntity.ok(ApiResponse.success(response, "Static recupere avec success"));
     }
 
     @GetMapping
@@ -70,15 +53,31 @@ public class MessageController {
         return ResponseEntity.ok(ApiResponse.success(responsePage, "Liste des messages récupérée"));
     }
 
+    @GetMapping("/stats/non-lus")
+    public ResponseEntity<ApiResponse<Long>> compterNonLus() {
+        Long response = messageUseCase.compterMessagesNonLus();
+        return ResponseEntity.ok(ApiResponse.success(response, "Statistiques récupérées avec succès"));
+    }
+
+    @PatchMapping("/{id}/lu")
+    public ResponseEntity<ApiResponse<MessageListResponse>> marquerCommeLu(@PathVariable Long id) {
+        Message message = messageUseCase.marquerCommeLu(id, "admin");
+        MessageListResponse response = messageApiMapper.toListResponse(message);
+        return ResponseEntity.ok(ApiResponse.success(response, "Message marqué comme lu"));
+    }
+
+
     @PatchMapping("/{id}/traite")
-    public ResponseEntity<ApiResponse<Message>> marquerCommeTraite(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success(messageUseCase.marquerCommeTraite(id, "admin"), "Message marqué comme traité"));
+    public ResponseEntity<ApiResponse<MessageListResponse>> marquerCommeTraite(@PathVariable Long id) {
+        Message message = messageUseCase.marquerCommeTraite(id, "admin");
+        MessageListResponse response = messageApiMapper.toListResponse(message);
+        return ResponseEntity.ok(ApiResponse.success(response, "Message marqué comme traité"));
     }
 
     @PatchMapping("/{id}/archive")
-    public ResponseEntity<ApiResponse<Message>> marquerCommeArchive(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success(messageUseCase.marquerCommeArchive(id, "admin"), "Message archivé"));
+    public ResponseEntity<ApiResponse<MessageListResponse>> marquerCommeArchive(@PathVariable Long id) {
+        Message message = messageUseCase.marquerCommeArchive(id, "admin");
+        MessageListResponse response = messageApiMapper.toListResponse(message);
+        return ResponseEntity.ok(ApiResponse.success(response, "Message archivé"));
     }
-
-
 }

@@ -1,4 +1,4 @@
-package cm.beautysempire.institut.api.formation.presentation.formation;
+package cm.beautysempire.institut.api.formation.presentation;
 
 import cm.beautysempire.institut.domain.formation.Formation;
 import org.mapstruct.Mapper;

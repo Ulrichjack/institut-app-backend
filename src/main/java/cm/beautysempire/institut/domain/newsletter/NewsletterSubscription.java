@@ -20,6 +20,7 @@ public class NewsletterSubscription {
         this.contacte = false;
     }
 
+
     public void marquerCommeContacte() {
         this.contacte = true;
     }

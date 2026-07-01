@@ -8,5 +8,5 @@ public interface WhatsAppNotifierPort {
     String genererLienAdmin(Message message);
 
     String genererLienConfirmationClient(Message message);
-
+    String genererLienCatalogue();
 }

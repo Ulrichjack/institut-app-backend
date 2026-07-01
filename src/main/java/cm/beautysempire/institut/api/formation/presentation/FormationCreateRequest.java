@@ -1,4 +1,4 @@
-package cm.beautysempire.institut.api.formation.presentation.formation;
+package cm.beautysempire.institut.api.formation.presentation;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

@@ -175,6 +175,8 @@ public class Formation {
         this.nombrePlaces = nouvellesInfos.getNombrePlaces();
         this.photoPrincipale = nouvellesInfos.getPhotoPrincipale();
         this.photosGalerie = nouvellesInfos.getPhotosGalerie();
+        this.socialProofActif = nouvellesInfos.getSocialProofActif();
+        this.nombreInscritsAffiche = nouvellesInfos.getNombreInscritsAffiche();
 
         this.enPromotion = nouvellesInfos.getEnPromotion();
         this.pourcentageReduction = nouvellesInfos.getPourcentageReduction();

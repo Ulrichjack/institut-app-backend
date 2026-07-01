@@ -15,9 +15,10 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL) // Masque les champs nuls (ex: pas d'error en cas de succès)
 public class ApiResponse<T> {
 
-    private final String status;      // "SUCCESS" ou "ERROR"
+
     private final int statusCode;     // Code HTTP (ex: 200, 201, 400)
     private final String message;     // Message explicatif
+    private final boolean success;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     @Builder.Default
@@ -31,7 +32,7 @@ public class ApiResponse<T> {
     // Pour un succès classique (200 OK)
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
-                .status("SUCCESS")
+                .success(true)
                 .statusCode(HttpStatus.OK.value())
                 .message(message)
                 .data(data)
@@ -41,7 +42,7 @@ public class ApiResponse<T> {
     // Pour un succès sans data (200 OK)
     public static <T> ApiResponse<T> success(String message) {
         return ApiResponse.<T>builder()
-                .status("SUCCESS")
+                .success(true)
                 .statusCode(HttpStatus.OK.value())
                 .message(message)
                 .build();
@@ -50,7 +51,7 @@ public class ApiResponse<T> {
     // Pour une création réussie (201 Created)
     public static <T> ApiResponse<T> created(T data, String message) {
         return ApiResponse.<T>builder()
-                .status("SUCCESS")
+                .success(true)
                 .statusCode(HttpStatus.CREATED.value())
                 .message(message)
                 .data(data)
@@ -60,7 +61,7 @@ public class ApiResponse<T> {
     // Pour les erreurs (400, 404, 500...)
     public static <T> ApiResponse<T> error(String message, HttpStatus status, Object errorDetails) {
         return ApiResponse.<T>builder()
-                .status("ERROR")
+                .success(false)
                 .statusCode(status.value())
                 .message(message)
                 .error(errorDetails)

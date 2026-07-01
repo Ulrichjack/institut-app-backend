@@ -31,6 +31,12 @@ public class NewsletterRepositoryAdapter implements NewsletterRepositoryPort {
     public Optional<NewsletterSubscription> findById(Long id){
         return  jpaRepository.findById(id).map(mapper::toDomain);
      }
+
+    @Override
+    public long count() {
+        return jpaRepository.count();
+    }
+
     @Override
     public boolean existsByTelephone(String telephone){
         return jpaRepository.existsByTelephone(telephone);

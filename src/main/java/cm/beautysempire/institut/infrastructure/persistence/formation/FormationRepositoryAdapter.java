@@ -50,4 +50,25 @@ public class FormationRepositoryAdapter implements FormationRepositoryPort {
     public Page<Formation> searchActiveFormations(String motCle, Pageable pageable) {
         return jpaRepository.searchByMotCle(motCle, pageable).map(mapper::toDomain);
     }
+
+    @Override
+    public long count() {
+        return jpaRepository.count();
+    }
+
+    @Override
+    public long countByActiveTrue() {
+        return jpaRepository.countByActiveTrue();
+    }
+
+    @Override
+    public Page<Formation> findAllPaginated(Pageable pageable) {
+        return jpaRepository.findAll(pageable).map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<Formation> searchAdminFormations(String motCle, String status, Pageable pageable) {
+        return jpaRepository.searchAdminFormations(motCle, status, pageable).map(mapper::toDomain);
+    }
+
 }

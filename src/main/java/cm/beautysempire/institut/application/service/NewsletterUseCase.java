@@ -1,5 +1,6 @@
 package cm.beautysempire.institut.application.service;
 
+import cm.beautysempire.institut.application.port.WhatsAppNotifierPort;
 import cm.beautysempire.institut.domain.newsletter.NewsletterSubscription;
 import cm.beautysempire.institut.domain.newsletter.NewsletterRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 public class NewsletterUseCase {
 
     private final NewsletterRepositoryPort repositoryPort;
+    private final WhatsAppNotifierPort whatsAppNotifierPort;
 
     public NewsletterSubscription souscrire(NewsletterSubscription subscription) {
         // On évite les doublons de numéros de téléphone
@@ -24,6 +26,10 @@ public class NewsletterUseCase {
     public Page<NewsletterSubscription> listerAbonnes(int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateInscription"));
         return repositoryPort.findAll(pageRequest);
+    }
+
+    public String genererLienWhatsAppCatalogue() {
+        return whatsAppNotifierPort.genererLienCatalogue();
     }
 
     public NewsletterSubscription marquerCommeContacte(Long id) {

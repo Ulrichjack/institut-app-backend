@@ -21,4 +21,15 @@ public interface FormationJpaRepository extends JpaRepository<FormationJpaEntity
             "LOWER(f.description) LIKE LOWER(CONCAT('%', :motCle, '%')) OR " +
             "LOWER(f.categorie) LIKE LOWER(CONCAT('%', :motCle, '%')))")
     Page<FormationJpaEntity> searchByMotCle(@Param("motCle") String motCle, Pageable pageable);
+
+
+    long countByActiveTrue();
+
+    @Query("SELECT f FROM FormationJpaEntity f WHERE " +
+            "(:status IS NULL OR :status = 'ALL' OR " +
+            "  (:status = 'ACTIVE' AND f.active = true) OR " +
+            "  (:status = 'INACTIVE' AND f.active = false)) AND " +
+            "(:motCle IS NULL OR :motCle = '' OR LOWER(f.nom) LIKE LOWER(CONCAT('%', :motCle, '%')) OR LOWER(f.categorie) LIKE LOWER(CONCAT('%', :motCle, '%')))")
+    Page<FormationJpaEntity> searchAdminFormations(@Param("motCle") String motCle, @Param("status") String status, Pageable pageable);
+
 }

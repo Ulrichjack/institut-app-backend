@@ -1,6 +1,6 @@
 // Fichier : src/main/java/cm/beautysempire/institut/api/formation/presentation/formation/FormationController.java
 
-package cm.beautysempire.institut.api.formation.presentation.formation;
+package cm.beautysempire.institut.api.formation.presentation;
 
 import cm.beautysempire.institut.application.service.FormationUseCase;
 import cm.beautysempire.institut.domain.formation.Formation;
@@ -115,6 +115,19 @@ public class FormationController {
     public ResponseEntity<ApiResponse<Void>> activerFormation(@PathVariable Long id) {
         formationUseCase.activerFormation(id, "admin");
         return ResponseEntity.ok(ApiResponse.success("Formation réactivée avec succès"));
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<ApiResponse<Page<FormationResponse>>> listerFormationsAdmin(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false, defaultValue = "ALL") String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<Formation> formationsPage = formationUseCase.listerFormationsAdmin(q, status, page, size);
+        Page<FormationResponse> responsePage = formationsPage.map(formationApiMapper::toResponse);
+
+        return ResponseEntity.ok(ApiResponse.success(responsePage, "Liste admin récupérée"));
     }
 
 }

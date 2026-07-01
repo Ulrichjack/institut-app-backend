@@ -14,16 +14,19 @@ public interface FormationRepositoryPort {
 
     Optional<Formation> findBySlug(String slug);
 
-//    long count();
-//
-//    List<Formation> findAllActive();
-
-
     Page<Formation> findAllActivePaginated(Pageable pageable);
-
 
     boolean existsByNom(String nom);
 
-
     Page<Formation> searchActiveFormations(String motCle, Pageable pageable);
+
+    long count();
+
+    long countByActiveTrue();
+
+
+    Page<Formation> findAllPaginated(Pageable pageable);
+
+    Page<Formation> searchAdminFormations(String motCle, String status, Pageable pageable);
+
 }
