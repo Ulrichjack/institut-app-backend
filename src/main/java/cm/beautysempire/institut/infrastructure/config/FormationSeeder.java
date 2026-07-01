@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-@Profile("dev") // S'exécute UNIQUEMENT en local (dev)
+@Profile("prod") // S'exécute UNIQUEMENT en local (dev)
 @RequiredArgsConstructor
 @Slf4j
 public class FormationSeeder implements CommandLineRunner {
