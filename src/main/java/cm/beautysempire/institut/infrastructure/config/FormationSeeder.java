@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
-@Profile("prod") // S'exécute UNIQUEMENT en local (dev)
+@Profile("prod") // S'exécute uniquement avec le profil prod
 @RequiredArgsConstructor
 @Slf4j
 public class FormationSeeder implements CommandLineRunner {
@@ -28,8 +28,89 @@ public class FormationSeeder implements CommandLineRunner {
             createFormations();
             log.info("Initialisation terminée avec succès !");
         } else {
-            log.info("Les formations existent déjà. Seed ignoré.");
+            log.info("Les formations existent déjà. Catalogue initial conservé.");
         }
+        createFormationsManquantes();
+    }
+
+    private void createFormationsManquantes() {
+        // Informations issues de l'affiche ; tarifs, durées et places à renseigner par l'admin.
+        creerFormationSiAbsente("Décoration intérieure", "Décoration", "decoration-interieure",
+                "Découvrez les bases de l'aménagement et de la décoration des espaces intérieurs : association des couleurs, choix des matières, éclairage et disposition du mobilier.");
+
+        creerFormationSiAbsente("Comptabilité informatisée de gestion", "Gestion", "comptabilite-informatisee-de-gestion",
+                "Apprenez à utiliser des outils informatiques pour enregistrer les opérations comptables, organiser les pièces justificatives et préparer les états de suivi de gestion.");
+        creerFormationSiAbsente("Comptabilité et gestion des entreprises", "Gestion", "comptabilite-et-gestion-des-entreprises",
+                "Développez les bases de la comptabilité et de la gestion d'entreprise : enregistrement des opérations, suivi de trésorerie, préparation des budgets et lecture des documents comptables.");
+        creerFormationSiAbsente("Secrétariat comptable", "Gestion", "secretariat-comptable",
+                "Associez les compétences du secrétariat au suivi comptable : classement des documents, préparation des factures, saisie des opérations et suivi administratif des règlements.");
+        creerFormationSiAbsente("Secrétariat bureautique", "Gestion", "secretariat-bureautique",
+                "Développez vos compétences en traitement de texte, tableur, gestion du courrier, classement et organisation des documents pour les tâches courantes de bureau.");
+        creerFormationSiAbsente("Secrétariat de direction", "Gestion", "secretariat-de-direction",
+                "Apprenez à organiser les agendas, préparer les réunions, rédiger les comptes rendus et assurer le suivi des dossiers et des communications d'une direction.");
+        creerFormationSiAbsente("Gestion des ressources humaines", "Gestion", "gestion-des-ressources-humaines",
+                "Découvrez les principales activités des ressources humaines : gestion des dossiers du personnel, suivi des absences, recrutement et organisation de la formation des collaborateurs.");
+        creerFormationSiAbsente("Marketing Digital", "Gestion", "marketing-digital",
+                "Apprenez à préparer une communication en ligne, créer des contenus pour les réseaux sociaux et suivre les résultats des actions de promotion numérique.");
+        creerFormationSiAbsente("Gestion des projets", "Gestion", "gestion-des-projets",
+                "Découvrez les méthodes pour définir les objectifs d'un projet, planifier les activités, organiser les ressources et suivre les délais, le budget et les résultats.");
+
+        creerFormationSiAbsente("Auxiliaire de vie (AVS)", "Santé", "auxiliaire-de-vie-avs",
+                "Découvrez l'accompagnement des personnes dans les activités de la vie quotidienne, avec une attention portée à l'autonomie, à l'écoute, à l'hygiène et au respect de la personne.");
+        creerFormationSiAbsente("Assistant en cabinet médical (ACM)", "Santé", "assistant-en-cabinet-medical-acm",
+                "Découvrez l'accueil en cabinet médical, l'organisation des rendez-vous, le suivi administratif des dossiers et les principes de confidentialité et d'hygiène.");
+        creerFormationSiAbsente("Vendeur en pharmacie", "Santé", "vendeur-en-pharmacie",
+                "Découvrez l'accueil des clients, l'organisation des stocks et le suivi des produits en pharmacie, ainsi que les limites du rôle de vendeur et l'orientation vers le pharmacien.");
+        creerFormationSiAbsente("Délégué médical", "Santé", "delegue-medical",
+                "Développez les bases de la communication professionnelle pour présenter des produits de santé, préparer les visites et assurer le suivi des échanges avec les professionnels du secteur.");
+        creerFormationSiAbsente("Assistant en kinésithérapie", "Santé", "assistant-en-kinesitherapie",
+                "Découvrez l'accueil des patients, l'organisation de l'espace et du matériel ainsi que l'assistance au fonctionnement d'un cabinet sous la supervision du kinésithérapeute.");
+        creerFormationSiAbsente("Secrétariat médical", "Santé", "secretariat-medical",
+                "Apprenez à accueillir les patients, organiser les rendez-vous et gérer les documents et dossiers médicaux dans le respect de la confidentialité.");
+        creerFormationSiAbsente("Assistant dentaire", "Santé", "assistant-dentaire",
+                "Découvrez l'organisation d'un cabinet dentaire, l'accueil des patients, la préparation du matériel et les principes d'hygiène dans l'assistance au praticien.");
+        creerFormationSiAbsente("Aide-soignante", "Santé", "aide-soignante",
+                "Découvrez les bases de l'accompagnement quotidien des patients, de l'hygiène et du confort, ainsi que la communication et le travail au sein d'une équipe soignante.");
+        creerFormationSiAbsente("Sciences infirmières", "Santé", "sciences-infirmieres",
+                "Explorez les fondements des sciences infirmières : observation, hygiène, prévention, relation avec le patient et organisation du travail en équipe de soins.");
+        creerFormationSiAbsente("Technicien de laboratoire", "Santé", "technicien-de-laboratoire",
+                "Découvrez l'environnement du laboratoire, la préparation du matériel, l'identification des échantillons et les principes de qualité, de traçabilité et d'hygiène.");
+        creerFormationSiAbsente("Sage-femme", "Santé", "sage-femme",
+                "Découvrez les domaines de la santé maternelle et néonatale : accompagnement de la grossesse, de la naissance et du suivi après l'accouchement, prévention et relation avec les familles.");
+
+        creerFormationSiAbsente("Infographie", "Informatique", "infographie",
+                "Développez les bases de la création graphique : composition, typographie, choix des couleurs et préparation de visuels pour les supports imprimés et numériques.");
+        creerFormationSiAbsente("Montage audiovisuel", "Informatique", "montage-audiovisuel",
+                "Apprenez à organiser les séquences, assembler les images et le son, ajouter des titres et préparer l'export d'un projet audiovisuel.");
+        creerFormationSiAbsente("Réseau informatique", "Informatique", "reseau-informatique",
+                "Découvrez les composants d'un réseau informatique, les bases de la configuration des équipements, du partage des ressources et du diagnostic des problèmes de connexion.");
+        creerFormationSiAbsente("Génie logiciel", "Informatique", "genie-logiciel",
+                "Découvrez les étapes de création d'un logiciel : analyse des besoins, conception, programmation, tests, documentation et maintenance des applications.");
+
+        creerFormationSiAbsente("Couture professionnelle", "Industrie", "couture-professionnelle",
+                "Développez les bases de la couture : prise de mesures, préparation des pièces, utilisation de la machine, assemblage et réalisation des finitions.");
+        creerFormationSiAbsente("Stylisme modélisme", "Industrie", "stylisme-modelisme",
+                "Découvrez la conception de vêtements, du dessin de mode au patron : choix des matières, construction des modèles, adaptation des coupes et préparation des prototypes.");
+        creerFormationSiAbsente("Haute couture", "Industrie", "haute-couture",
+                "Explorez les techniques de confection soignée : travail des volumes, ajustement du vêtement, assemblage précis et finitions réalisées avec une attention particulière aux détails.");
+        creerFormationSiAbsente("Électricité", "Industrie", "electricite",
+                "Découvrez les bases des circuits électriques, la lecture des schémas, les équipements et les principes de sécurité associés aux travaux d'installation et de maintenance.");
+        creerFormationSiAbsente("Restauration", "Industrie", "restauration",
+                "Découvrez l'organisation du travail en restauration, la préparation culinaire, les règles d'hygiène alimentaire et les bases du service et de la présentation des plats.");
+        creerFormationSiAbsente("Élevage", "Industrie", "elevage",
+                "Découvrez les bases de la conduite d'un élevage : organisation des installations, alimentation, hygiène, suivi des animaux et gestion courante de l'activité.");
+    }
+
+    private void creerFormationSiAbsente(String nom, String categorie, String slug, String description) {
+        if (formationRepositoryPort.existsByNom(nom) || formationRepositoryPort.findBySlug(slug).isPresent()) {
+            return;
+        }
+        formationUseCase.creerFormation(Formation.builder()
+                .nom(nom)
+                .categorie(categorie)
+                .description(description)
+                .slug(slug)
+                .build(), "system");
     }
 
     private void createFormations() {
