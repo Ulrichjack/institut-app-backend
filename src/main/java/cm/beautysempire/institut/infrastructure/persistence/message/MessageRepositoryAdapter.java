@@ -3,6 +3,7 @@ package cm.beautysempire.institut.infrastructure.persistence.message;
 import cm.beautysempire.institut.domain.messages.Message;
 import cm.beautysempire.institut.domain.messages.MessageRepositoryPort;
 import cm.beautysempire.institut.domain.messages.StatutMessage;
+import cm.beautysempire.institut.domain.messages.TypeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,11 @@ public class MessageRepositoryAdapter implements MessageRepositoryPort {
     public Page<Message> findAll(Pageable pageable) {
         return jpaRepository.findAll(pageable)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<Message> search(String query, StatutMessage statut, TypeMessage type, Pageable pageable) {
+        return jpaRepository.search(query, statut, type, pageable).map(mapper::toDomain);
     }
 
     @Override

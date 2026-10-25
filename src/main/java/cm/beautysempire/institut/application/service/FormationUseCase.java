@@ -79,14 +79,14 @@ public class FormationUseCase {
     }
 
     public Page<Formation> rechercherFormations(String motCle, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation", "id"));
         return formationRepositoryPort.searchActiveFormations(motCle, pageRequest);
     }
 
 
     public Page<Formation> listerFormationsActivesPaginees(int page, int size) {
         // On trie par date de création décroissante (les plus récentes en premier)
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation", "id"));
         return formationRepositoryPort.findAllActivePaginated(pageRequest);
     }
 
@@ -114,12 +114,12 @@ public class FormationUseCase {
     }
 
     public Page<Formation> listerToutesFormationsPaginees(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation", "id"));
         return formationRepositoryPort.findAllPaginated(pageRequest);
     }
 
     public Page<Formation> listerFormationsAdmin(String motCle, String status, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation", "id"));
         return formationRepositoryPort.searchAdminFormations(motCle, status, pageRequest);
     }
 

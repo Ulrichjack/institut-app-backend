@@ -105,6 +105,7 @@ public class Formation {
     }
 
     public BigDecimal getPrixAvecReduction() {
+        if (prix == null) return null;
         if (!isPromoActive() || pourcentageReduction == null || pourcentageReduction.equals(BigDecimal.ZERO)) {
             return prix;
         }
@@ -113,6 +114,7 @@ public class Formation {
     }
 
     public boolean isPromoActive() {
+        if (prix == null) return false;
         if (enPromotion == null || !enPromotion) return false;
         LocalDateTime now = LocalDateTime.now();
         return (dateDebutPromo == null || now.isAfter(dateDebutPromo)) &&

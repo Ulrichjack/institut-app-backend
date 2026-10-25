@@ -15,6 +15,8 @@ public interface MessageRepositoryPort {
 
     Page<Message> findAll(Pageable pageable);
 
+    Page<Message> search(String query, StatutMessage statut, TypeMessage type, Pageable pageable);
+
     Optional <Message> findById(Long id);
 
     void deleteById(Long id);

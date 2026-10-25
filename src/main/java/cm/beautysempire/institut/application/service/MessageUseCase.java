@@ -8,6 +8,8 @@ import cm.beautysempire.institut.domain.formation.FormationRepositoryPort;
 import cm.beautysempire.institut.domain.messages.Message;
 import cm.beautysempire.institut.domain.messages.MessageRepositoryPort;
 import cm.beautysempire.institut.domain.messages.StatutMessage;
+import cm.beautysempire.institut.domain.messages.TypeMessage;
+import cm.beautysempire.institut.application.exception.MessageNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,7 +55,7 @@ public class MessageUseCase {
     // 4. Changer le statut d'un message (Pour l'admin)
     public Message marquerCommeLu(Long messageId, String admin) {
         Message message = messageRepositoryPort.findById(messageId)
-                .orElseThrow(()-> new RuntimeException("Message avce ID " +messageId + "non trouve"));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
         message.marquerCommeLu(admin);
         return messageRepositoryPort.save(message);
     }
@@ -67,21 +69,28 @@ public class MessageUseCase {
     }
 
     public Page<Message> listerMessagesPagines(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
-        // Note: Il faudra ajouter findAll(Pageable) dans MessageRepositoryPort et Adapter !
-        return messageRepositoryPort.findAll(pageRequest);
+        return listerMessagesPagines(page, size, "", null, null);
+    }
+
+    public Page<Message> listerMessagesPagines(int page, int size, String query, StatutMessage statut, TypeMessage type) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("La page doit être positive ou nulle et la taille comprise entre 1 et 100.");
+        }
+        PageRequest pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.DESC, "dateCreation", "id"));
+        return messageRepositoryPort.search(query == null ? "" : query.trim(), statut, type, pageable);
     }
 
     public Message marquerCommeTraite(Long messageId, String admin) {
         Message message = messageRepositoryPort.findById(messageId)
-                .orElseThrow(() -> new RuntimeException("Message non trouvé"));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
         message.marquerCommeTraite(admin);
         return messageRepositoryPort.save(message);
     }
 
     public Message marquerCommeArchive(Long messageId, String admin) {
         Message message = messageRepositoryPort.findById(messageId)
-                .orElseThrow(() -> new RuntimeException("Message non trouvé"));
+                .orElseThrow(() -> new MessageNotFoundException(messageId));
         message.marquerCommeArchive(admin);
         return messageRepositoryPort.save(message);
     }

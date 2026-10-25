@@ -2,6 +2,8 @@ package cm.beautysempire.institut.api.shared;
 
 import cm.beautysempire.institut.application.exception.FormationCompleteException;
 import cm.beautysempire.institut.application.exception.FormationNotFoundException;
+import cm.beautysempire.institut.application.exception.MessageNotFoundException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,18 @@ public class GlobalExceptionHandler {
         log.warn("Ressource introuvable : {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND, null));
+    }
+
+    @ExceptionHandler(MessageNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMessageNotFound(MessageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND, null));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidParameter(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(
+                "Valeur invalide pour le paramètre : " + ex.getName(), HttpStatus.BAD_REQUEST, null));
     }
 
     // 3. Gère nos exceptions métier (Formation complète)

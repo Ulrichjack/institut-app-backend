@@ -3,6 +3,8 @@ package cm.beautysempire.institut.api.message.presentation;
 import cm.beautysempire.institut.api.shared.ApiResponse;
 import cm.beautysempire.institut.application.service.MessageUseCase;
 import cm.beautysempire.institut.domain.messages.Message;
+import cm.beautysempire.institut.domain.messages.StatutMessage;
+import cm.beautysempire.institut.domain.messages.TypeMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,9 +47,12 @@ public class MessageController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<MessageListResponse>>> listerMessages(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(required = false) StatutMessage statut,
+            @RequestParam(required = false) TypeMessage type) {
 
-        Page<Message> messagesPage = messageUseCase.listerMessagesPagines(page, size);
+        Page<Message> messagesPage = messageUseCase.listerMessagesPagines(page, size, q, statut, type);
         Page<MessageListResponse> responsePage = messagesPage.map(messageApiMapper::toListResponse);
 
         return ResponseEntity.ok(ApiResponse.success(responsePage, "Liste des messages récupérée"));

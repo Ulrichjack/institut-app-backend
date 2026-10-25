@@ -57,9 +57,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults()) // Authentification basique (Username/Password dans le Header)
+                // L'interface affiche l'erreur de connexion, sans dialogue natif HTTP Basic.
+                .httpBasic(basic -> basic.authenticationEntryPoint((request, response, exception) ->
+                        response.setStatus(401)))
                 .authorizeHttpRequests(authz -> authz
                         // 🟢 ROUTES PUBLIQUES (Lecture)
+                        .requestMatchers(HttpMethod.GET, "/api/formations/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/formations/**", "/api/gallery/**", "/api/testimonials").permitAll()
 
                         // 🟢 ROUTES PUBLIQUES (Écriture - protégées par le Rate Limiter)

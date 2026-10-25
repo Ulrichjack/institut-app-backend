@@ -23,14 +23,11 @@ public class FormationCreateRequest {
     @NotBlank(message = "La description est obligatoire")
     private String description;
 
-    @NotBlank(message = "La durée est obligatoire")
     private String duree;
 
-    @NotNull(message = "Les frais d'inscription sont obligatoires")
     @Min(value = 0, message = "Les frais d'inscription doivent être positifs")
     private BigDecimal fraisInscription;
 
-    @NotNull(message = "Le prix est obligatoire")
     @Min(value = 0, message = "Le prix doit être positif")
     private BigDecimal prix;
 
@@ -52,7 +49,6 @@ public class FormationCreateRequest {
     private String horaires;
     private String frequence;
 
-    @NotNull(message = "Le nombre de places est obligatoire")
     @Min(value = 1, message = "Il faut au moins 1 place")
     private Integer nombrePlaces;
 

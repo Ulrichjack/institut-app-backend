@@ -14,6 +14,11 @@ public class MessageListResponse {
     private String nom;
     private String telephone;
     private String sujet;
+    private String message;
+    private String disponibilites;
+    private String email;
+    private String ville;
+    private String quartier;
     private String formationNom;
     private LocalDateTime dateCreation;
 

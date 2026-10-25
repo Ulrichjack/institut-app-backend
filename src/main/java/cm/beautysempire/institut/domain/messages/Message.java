@@ -83,7 +83,7 @@ public class Message {
     //Centraliser la verification de la transition de statut pour éviter la duplication de code
     private void validerEtChangerStatut(StatutMessage nouveauStatut, String admin) {
         if (!this.statut.peutEvoluerVers(nouveauStatut)) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     String.format("Action impossible : Le message ne peut pas passer de %s à %s", this.statut, nouveauStatut)
             );
         }

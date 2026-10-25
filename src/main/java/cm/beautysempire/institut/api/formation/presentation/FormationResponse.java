@@ -33,6 +33,12 @@ public class FormationResponse {
     private BigDecimal pourcentageReduction;
 
     private LocalDateTime dateFinPromo;
+    private Boolean enPromotion;
+    private LocalDateTime dateDebutPromo;
+    private Boolean socialProofActif;
+    private Integer nombreInscritsAffiche;
+    private LocalDate dateFinInscription;
+    private String joursFormation;
     // ---------------------------------------------------
 
     private LocalDate dateDemarrage;
