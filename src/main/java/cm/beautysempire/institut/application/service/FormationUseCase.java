@@ -56,6 +56,20 @@ public class FormationUseCase {
         return formationRepositoryPort.save(formationExistante);
     }
 
+    public List<Formation> listerFormationsMisesEnAvant() {
+        return formationRepositoryPort.findMisesEnAvant();
+    }
+
+    public Formation mettreAJourMiseEnAvant(Long id, boolean miseEnAvant, Integer ordreAffichage, String admin) {
+        Formation formation = formationRepositoryPort.findById(id)
+                .orElseThrow(() -> new FormationNotFoundException(id));
+        formation.mettreAJourMiseEnAvant(miseEnAvant, ordreAffichage, admin);
+        if (miseEnAvant && formationRepositoryPort.existsMiseEnAvantAtPosition(ordreAffichage, id)) {
+            throw new IllegalArgumentException("Cette position sur l'accueil est déjà occupée. Choisissez une position libre.");
+        }
+        return formationRepositoryPort.save(formation);
+    }
+
     public void supprimerFormation(Long id, String admin) {
         Formation formation = formationRepositoryPort.findById(id)
                 .orElseThrow(() -> new FormationNotFoundException(id));

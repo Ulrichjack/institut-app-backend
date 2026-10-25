@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/formations")
 @RequiredArgsConstructor
@@ -63,6 +65,22 @@ public class FormationController {
         FormationResponse response = formationApiMapper.toResponse(updateSocialProof);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(response, "Mise a jour Social Proof realise avec succès"));
+    }
+
+    @GetMapping("/mises-en-avant")
+    public ResponseEntity<ApiResponse<List<FormationResponse>>> listerFormationsMisesEnAvant() {
+        List<FormationResponse> formations = formationUseCase.listerFormationsMisesEnAvant()
+                .stream().map(formationApiMapper::toResponse).toList();
+        return ResponseEntity.ok(ApiResponse.success(formations, "Formations mises en avant sur l'accueil"));
+    }
+
+    @PatchMapping("/{id}/mise-en-avant")
+    public ResponseEntity<ApiResponse<FormationResponse>> mettreAJourMiseEnAvant(
+            @PathVariable Long id, @Valid @RequestBody FormationMiseEnAvantRequest request) {
+        Formation formation = formationUseCase.mettreAJourMiseEnAvant(
+                id, request.miseEnAvant(), request.ordreAffichage(), "admin");
+        return ResponseEntity.ok(ApiResponse.success(formationApiMapper.toResponse(formation),
+                "Sélection pour l'accueil mise à jour"));
     }
 
     @GetMapping("/actives")

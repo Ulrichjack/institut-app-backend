@@ -47,6 +47,8 @@ public class Formation {
     private List<String> photosGalerie;
 
     private Boolean active;
+    private Boolean miseEnAvant;
+    private Integer ordreAffichage;
     private Boolean enPromotion;
     private BigDecimal pourcentageReduction;
     private LocalDateTime dateDebutPromo;
@@ -123,6 +125,8 @@ public class Formation {
         this.modifiePar = admin;
         this.active = true;
         this.version = 0L;
+        this.miseEnAvant = false;
+        this.ordreAffichage = null;
 
         // Sécurité absolue contre les NULL pour la Base de données
         if (this.nombreInscritsReel == null) this.nombreInscritsReel = 0;
@@ -196,12 +200,29 @@ public class Formation {
 
     public void desactiver(String admin) {
         this.active = false;
+        this.miseEnAvant = false;
+        this.ordreAffichage = null;
         this.dateMiseAJour = LocalDateTime.now();
         this.modifiePar = admin;
     }
 
     public void activer(String admin) {
         this.active = true;
+        this.dateMiseAJour = LocalDateTime.now();
+        this.modifiePar = admin;
+    }
+
+    public void mettreAJourMiseEnAvant(boolean miseEnAvant, Integer ordreAffichage, String admin) {
+        if (miseEnAvant) {
+            if (!Boolean.TRUE.equals(this.active)) {
+                throw new IllegalArgumentException("Seule une formation active peut apparaître sur l'accueil.");
+            }
+            if (ordreAffichage == null || ordreAffichage < 1 || ordreAffichage > 6) {
+                throw new IllegalArgumentException("La position sur l'accueil doit être comprise entre 1 et 6.");
+            }
+        }
+        this.miseEnAvant = miseEnAvant;
+        this.ordreAffichage = miseEnAvant ? ordreAffichage : null;
         this.dateMiseAJour = LocalDateTime.now();
         this.modifiePar = admin;
     }

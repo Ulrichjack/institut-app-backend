@@ -16,6 +16,10 @@ public interface FormationRepositoryPort {
 
     Page<Formation> findAllActivePaginated(Pageable pageable);
 
+    List<Formation> findMisesEnAvant();
+
+    boolean existsMiseEnAvantAtPosition(Integer position, Long excludedId);
+
     boolean existsByNom(String nom);
 
     Page<Formation> searchActiveFormations(String motCle, Pageable pageable);

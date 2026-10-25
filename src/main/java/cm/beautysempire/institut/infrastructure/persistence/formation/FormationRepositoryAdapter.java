@@ -5,6 +5,7 @@ import cm.beautysempire.institut.domain.formation.FormationRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,8 +22,17 @@ public class FormationRepositoryAdapter implements FormationRepositoryPort {
     @Override
     public Formation save(Formation formation) {
         FormationJpaEntity entity = mapper.toEntity(formation);
-        FormationJpaEntity savedEntity = jpaRepository.save(entity);
-        return mapper.toDomain(savedEntity);
+        try {
+            FormationJpaEntity savedEntity = jpaRepository.save(entity);
+            return mapper.toDomain(savedEntity);
+        } catch (DataIntegrityViolationException ex) {
+            // L'index garantit aussi l'unicité lorsque deux admins choisissent la même position.
+            if (ex.getMostSpecificCause().getMessage() != null
+                    && ex.getMostSpecificCause().getMessage().contains("uk_formations_ordre_mise_en_avant")) {
+                throw new IllegalArgumentException("Cette position sur l'accueil est déjà occupée. Choisissez une position libre.", ex);
+            }
+            throw ex;
+        }
     }
 
     @Override
@@ -39,6 +49,17 @@ public class FormationRepositoryAdapter implements FormationRepositoryPort {
     @Override
     public Page<Formation> findAllActivePaginated(Pageable pageable) {
         return jpaRepository.findByActiveTrue(pageable).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Formation> findMisesEnAvant() {
+        return jpaRepository.findTop6ByActiveTrueAndMiseEnAvantTrueOrderByOrdreAffichageAscIdAsc()
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public boolean existsMiseEnAvantAtPosition(Integer position, Long excludedId) {
+        return jpaRepository.existsByMiseEnAvantTrueAndOrdreAffichageAndIdNot(position, excludedId);
     }
 
     @Override

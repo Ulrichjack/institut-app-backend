@@ -46,4 +46,6 @@ public class FormationResponse {
     private String slug;
 
     private Boolean active;
+    private Boolean miseEnAvant;
+    private Integer ordreAffichage;
 }

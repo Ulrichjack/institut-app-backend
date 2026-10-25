@@ -14,6 +14,10 @@ public interface FormationJpaRepository extends JpaRepository<FormationJpaEntity
 
     Page<FormationJpaEntity> findByActiveTrue(Pageable pageable);
 
+    List<FormationJpaEntity> findTop6ByActiveTrueAndMiseEnAvantTrueOrderByOrdreAffichageAscIdAsc();
+
+    boolean existsByMiseEnAvantTrueAndOrdreAffichageAndIdNot(Integer ordreAffichage, Long id);
+
     boolean existsByNomIgnoreCase(String nom);
 
     @Query("SELECT f FROM FormationJpaEntity f WHERE f.active = true AND " +

@@ -59,6 +59,9 @@ public class FormationJpaEntity {
     private List<String> photosGalerie;
 
     private Boolean active;
+    @Column(nullable = false)
+    private Boolean miseEnAvant;
+    private Integer ordreAffichage;
     private Boolean enPromotion;
     private BigDecimal pourcentageReduction;
     private LocalDateTime dateDebutPromo;
