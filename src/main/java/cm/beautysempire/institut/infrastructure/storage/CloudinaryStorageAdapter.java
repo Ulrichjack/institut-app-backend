@@ -21,11 +21,9 @@ public class CloudinaryStorageAdapter implements StoragePort {
     @Override
     public String[] uploadImage(MultipartFile file, String dossier) {
         try {
-            // On demande à Cloudinary de compresser l'image (quality: auto) et de choisir le meilleur format (fetch_format: auto)
+            // Conserver le fichier envoyé ; les versions affichées sont optimisées à la livraison.
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                    "folder", dossier,
-                    "quality", "auto:good",
-                    "fetch_format", "auto"
+                    "folder", dossier
             ));
 
             String url = uploadResult.get("secure_url").toString();

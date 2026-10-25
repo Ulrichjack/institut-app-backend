@@ -12,6 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import javax.sql.DataSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,10 +45,35 @@ class AdminFlowsIntegrationTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper json;
     @Autowired private MessageRepositoryPort messages;
+    @Autowired private DataSource dataSource;
     @MockBean private StoragePort storage;
 
     private static final String AUTH = "Basic " + Base64.getEncoder().encodeToString(
             "integration-admin:integration-password".getBytes(StandardCharsets.UTF_8));
+
+    @Test
+    void migrationRetireLesPhotosFictivesEtConserveLesPhotosAdminEtLesFormations() {
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        Long oldId = jdbc.queryForObject("INSERT INTO formations(nom, description, categorie, date_creation, photo_principale) " +
+                "VALUES ('Ancienne formation', 'Description', 'Test', NOW(), 'pack1.jpg') RETURNING id", Long.class);
+        Long adminId = jdbc.queryForObject("INSERT INTO formations(nom, description, categorie, date_creation, photo_principale) " +
+                "VALUES ('Photo admin', 'Description', 'Test', NOW(), 'https://example.invalid/pack1.jpg') RETURNING id", Long.class);
+        jdbc.update("INSERT INTO formation_photos(formation_id, photo_url) VALUES (?, 'pack1_1.jpg'), (?, 'https://example.invalid/pack1_1.jpg'), (?, '/assets/custom.jpg')",
+                oldId, oldId, adminId);
+        Long countBefore = jdbc.queryForObject("SELECT COUNT(*) FROM formations", Long.class);
+
+        ResourceDatabasePopulator migration = new ResourceDatabasePopulator(new ClassPathResource(
+                "db/migration/V11__remove_legacy_formation_placeholder_images.sql"));
+        migration.execute(dataSource);
+        migration.execute(dataSource); // Un second passage ne doit rien dégrader.
+
+        assertThat(jdbc.queryForObject("SELECT photo_principale FROM formations WHERE id = ?", String.class, oldId)).isNull();
+        assertThat(jdbc.queryForObject("SELECT photo_principale FROM formations WHERE id = ?", String.class, adminId))
+                .isEqualTo("https://example.invalid/pack1.jpg");
+        assertThat(jdbc.queryForList("SELECT photo_url FROM formation_photos WHERE formation_id IN (?, ?) ORDER BY photo_url",
+                String.class, oldId, adminId)).containsExactly("/assets/custom.jpg", "https://example.invalid/pack1_1.jpg");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM formations", Long.class)).isEqualTo(countBefore);
+    }
 
     @Test
     void toutesLesListesAdminSontProtegees() throws Exception {

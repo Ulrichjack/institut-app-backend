@@ -33,6 +33,10 @@ class FormationSeederTest {
 
         seeder.run();
         assertThat(catalogue).hasSize(53).containsKeys("Infographie", "Sage-femme", "Élevage");
+        assertThat(catalogue.values()).allSatisfy(formation -> {
+            assertThat(formation.getPhotoPrincipale()).isNull();
+            assertThat(formation.getPhotosGalerie()).isNullOrEmpty();
+        });
 
         seeder.run();
         assertThat(catalogue).hasSize(53);
@@ -78,12 +82,14 @@ class FormationSeederTest {
         seeder.run();
         Formation infographie = catalogue.get("Infographie");
         infographie.setPrix(new BigDecimal("123456"));
+        infographie.setPhotoPrincipale("https://example.invalid/admin.jpg");
 
         seeder.run();
 
         verify(repository, times(30)).save(any(Formation.class));
         assertThat(catalogue).hasSize(30);
         assertThat(catalogue.get("Infographie").getPrix()).isEqualByComparingTo("123456");
+        assertThat(catalogue.get("Infographie").getPhotoPrincipale()).isEqualTo("https://example.invalid/admin.jpg");
     }
 
     @Test
