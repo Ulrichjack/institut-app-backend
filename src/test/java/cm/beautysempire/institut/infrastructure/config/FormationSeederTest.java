@@ -19,6 +19,27 @@ import static org.mockito.Mockito.*;
 class FormationSeederTest {
 
     @Test
+    void uneBaseVideRecoitLes53FormationsSansDoublonAuRedemarrage() {
+        FormationRepositoryPort repository = mock(FormationRepositoryPort.class);
+        Map<String, Formation> catalogue = new HashMap<>();
+        when(repository.count()).thenAnswer(call -> (long) catalogue.size());
+        when(repository.existsByNom(anyString())).thenAnswer(call -> catalogue.containsKey(call.getArgument(0)));
+        when(repository.save(any(Formation.class))).thenAnswer(call -> {
+            Formation formation = call.getArgument(0);
+            catalogue.put(formation.getNom(), formation);
+            return formation;
+        });
+        FormationSeeder seeder = new FormationSeeder(repository, new FormationUseCase(repository));
+
+        seeder.run();
+        assertThat(catalogue).hasSize(53).containsKeys("Infographie", "Sage-femme", "Élevage");
+
+        seeder.run();
+        assertThat(catalogue).hasSize(53);
+        verify(repository, times(53)).save(any(Formation.class));
+    }
+
+    @Test
     void ajouteLesFormationsDeLAfficheSansInventerLesTarifsDansUneBaseExistante() {
         FormationRepositoryPort repository = mock(FormationRepositoryPort.class);
         when(repository.count()).thenReturn(23L);

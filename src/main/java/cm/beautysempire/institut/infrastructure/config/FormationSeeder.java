@@ -23,14 +23,18 @@ public class FormationSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (formationRepositoryPort.count() == 0) {
-            log.info("Base de données vide : Initialisation des 23 formations et packs...");
+        long nombreAvantInitialisation = formationRepositoryPort.count();
+        if (nombreAvantInitialisation == 0) {
+            log.info("Base de données vide : création des 23 formations et packs du catalogue initial...");
             createFormations();
-            log.info("Initialisation terminée avec succès !");
         } else {
             log.info("Les formations existent déjà. Catalogue initial conservé.");
         }
+        log.info("Vérification et ajout des 30 formations complémentaires de l'affiche...");
         createFormationsManquantes();
+        long nombreApresInitialisation = formationRepositoryPort.count();
+        log.info("Initialisation des formations terminée : {} ajoutées, {} au total en base.",
+                nombreApresInitialisation - nombreAvantInitialisation, nombreApresInitialisation);
     }
 
     private void createFormationsManquantes() {
